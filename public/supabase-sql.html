@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Supabase SQL - exercise_entries</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif; margin: 24px; line-height: 1.6; }
+    h1 { font-size: 20px; margin-bottom: 16px; }
+    h2 { font-size: 16px; margin-top: 24px; margin-bottom: 8px; }
+    p { margin: 8px 0; }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; }
+    pre { background: #f6f8fa; border: 1px solid #eaecef; border-radius: 6px; padding: 12px; overflow: auto; }
+    .block { margin-bottom: 20px; }
+    .note { color: #555; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h1>Scripts SQL para exercise_entries (Supabase)</h1>
+  <p class="note">Observação: execute estes scripts no SQL Editor do seu projeto Supabase. A aplicação já consulta a view <strong>exercise_entries_latest</strong> quando disponível.</p>
+
+  <div class="block">
+    <h2>1) Índice recomendado para performance</h2>
+    <pre><code>create index if not exists exercise_entries_user_workout_exercise_date_idx
+  on public.exercise_entries (user_id, workout_id, exercise_id, date desc);
+</code></pre>
+  </div>
+
+  <div class="block">
+    <h2>2) Constraint opcional para evitar duplicados por dia</h2>
+    <pre><code>do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'exercise_entries_unique_per_day'
+  ) then
+    alter table public.exercise_entries
+      add constraint exercise_entries_unique_per_day
+      unique (user_id, workout_id, exercise_id, date);
+  end if;
+end $$;
+</code></pre>
+  </div>
+
+  <div class="block">
+    <h2>3) View do último registro por usuário/treino/exercício</h2>
+    <pre><code>drop view if exists public.exercise_entries_latest;
+
+create view public.exercise_entries_latest as
+select id,
+       user_id,
+       workout_id,
+       exercise_id,
+       load,
+       note,
+       date
+from (
+  select e.*,
+         row_number() over (
+           partition by user_id, workout_id, exercise_id
+           order by date desc, id desc
+         ) as rn
+  from public.exercise_entries e
+) t
+where t.rn = 1;
+</code></pre>
+    <p class="note">Se sua tabela não possuir coluna <code>id</code>, troque <code>id desc</code> por <code>created_at desc</code> (caso exista), ou mantenha apenas <code>date desc</code>.</p>
+  </div>
+
+  <div class="block">
+    <h2>4) Ativar RLS e políticas por usuário</h2>
+    <pre><code>alter table public.exercise_entries enable row level security;
+
+-- Permitir leitura apenas dos próprios registros
+create policy if not exists exercise_entries_select_own
+  on public.exercise_entries
+  for select
+  using (user_id = auth.uid());
+
+-- Permitir inserção de registros do próprio usuário
+create policy if not exists exercise_entries_insert_own
+  on public.exercise_entries
+  for insert
+  with check (user_id = auth.uid());
+
+-- Permitir atualização apenas dos próprios registros
+create policy if not exists exercise_entries_update_own
+  on public.exercise_entries
+  for update
+  using (user_id = auth.uid())
+  with check (user_id = auth.uid());
+
+-- Permitir exclusão apenas dos próprios registros
+create policy if not exists exercise_entries_delete_own
+  on public.exercise_entries
+  for delete
+  using (user_id = auth.uid());
+</code></pre>
+    <p class="note">Estas políticas pressupõem que a coluna <code>user_id</code> está sendo preenchida com o ID do usuário autenticado (auth.uid()).</p>
+  </div>
+
+  <div class="block">
+    <h2>5) Dica</h2>
+    <p class="note">Garanta que seu arquivo <code>.env.local</code> contém <code>VITE_SUPABASE_URL</code> e <code>VITE_SUPABASE_ANON_KEY</code> para que o frontend conecte corretamente.</p>
+  </div>
+
+  <div class="block">
+    <h2>6) Modo usuário único (sem autenticação)</h2>
+    <p class="note">Se apenas uma pessoa usará o app e você não quer autenticação, execute estes scripts para permitir acesso total com a chave pública (anon).</p>
+    <pre><code>-- Desativar RLS nas tabelas
+alter table public.exercise_entries disable row level security;
+alter table public.workout_completions disable row level security;
+
+-- Tornar user_id opcional (se existir e for NOT NULL)
+  -- Ajuste o tipo conforme sua tabela. Se não houver a coluna, ignore este bloco.
+  alter table public.exercise_entries alter column user_id drop not null;
+  alter table public.workout_completions alter column user_id drop not null;
+
+-- Atualizar constraint de unicidade para não depender de user_id
+-- Remove a constraint anterior (se existir) e cria uma nova baseada só em workout/exercise/date
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'exercise_entries_unique_per_day'
+  ) THEN
+    ALTER TABLE public.exercise_entries DROP CONSTRAINT exercise_entries_unique_per_day;
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'exercise_entries_unique_per_day_single'
+  ) THEN
+    ALTER TABLE public.exercise_entries
+      ADD CONSTRAINT exercise_entries_unique_per_day_single
+      UNIQUE (workout_id, exercise_id, date);
+  END IF;
+END $$;
+
+-- Atualizar a view para não particionar por user_id
+DROP VIEW IF EXISTS public.exercise_entries_latest;
+CREATE VIEW public.exercise_entries_latest AS
+SELECT id,
+       workout_id,
+       exercise_id,
+       load,
+       note,
+       date
+FROM (
+  SELECT e.*, ROW_NUMBER() OVER (
+           PARTITION BY workout_id, exercise_id
+           ORDER BY date DESC, id DESC
+         ) AS rn
+  FROM public.exercise_entries e
+) t
+WHERE t.rn = 1;
+</code></pre>
+    <p class="note">Com estas mudanças, o frontend funciona sem login. Se sua tabela não possuir coluna <code>id</code>, troque <code>id desc</code> por <code>created_at desc</code> (caso exista), ou mantenha apenas <code>date desc</code>.</p>
+  </div>
+</body>
+</html>

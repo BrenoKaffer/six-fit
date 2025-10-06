@@ -56,8 +56,9 @@ const WorkoutTracker = () => {
         { id: 'c6', name: 'Elevação Pélvica', reps: '15', sets: '4x', type: 'N' },
         { id: 'c7', name: 'Panturrilha em Pé (Rotação Interna)', reps: '15', sets: '4x', type: 'N' },
         { id: 'c8', name: 'Abdução na Máquina', reps: '15', sets: '3x', type: 'N' },
-        { id: 'c9', name: 'Abdominal Infra Banco Declinado', reps: '15', sets: '3x', type: 'N' },
-        { id: 'c10', name: 'Bicicleta', reps: '10 min', sets: '1x', type: 'CARDIO' }
+        { id: 'c9', name: 'Adução na Máquina', reps: '15', sets: '3x', type: 'N' },
+        { id: 'c10', name: 'Abdominal Infra Banco Declinado', reps: '15', sets: '3x', type: 'N' },
+        { id: 'c11', name: 'Bicicleta', reps: '10 min', sets: '1x', type: 'CARDIO' }
       ]
     },
     D: {
@@ -89,9 +90,10 @@ const WorkoutTracker = () => {
         { id: 'e5', name: 'Mesa Flexora', reps: '15', sets: '3x', type: 'N' },
         { id: 'e6', name: 'Afundo Búlgaro', reps: '12', sets: '3x', type: 'N' },
         { id: 'e7', name: 'Panturrilha Sentado', reps: '20', sets: '4x', type: 'N' },
-        { id: 'e8', name: 'Adução na Máquina', reps: '15', sets: '3x', type: 'N' },
-        { id: 'e9', name: 'Abdominal Oblíquo (Bicicleta)', reps: '15 cada lado', sets: '3x', type: 'N' },
-        { id: 'e10', name: 'Bicicleta', reps: '10 min', sets: '1x', type: 'CARDIO' }
+        { id: 'e8', name: 'Abdução na Máquina', reps: '15', sets: '3x', type: 'N' },
+        { id: 'e9', name: 'Adução na Máquina', reps: '15', sets: '3x', type: 'N' },
+        { id: 'e10', name: 'Abdominal Oblíquo (Bicicleta)', reps: '15 cada lado', sets: '3x', type: 'N' },
+        { id: 'e11', name: 'Bicicleta', reps: '10 min', sets: '1x', type: 'CARDIO' }
       ]
     }
   };
@@ -165,7 +167,7 @@ const WorkoutTracker = () => {
             <Target className="text-blue-600" size={28} />
             <div>
               <h1 className="text-xl font-bold text-gray-800">Workout Tracker</h1>
-              <p className="text-gray-600 text-sm">Ombro 3D + Perna de Jogador</p>
+              <p className="text-gray-600 text-sm">Ombro 3D + Perna de Jogador + Glúteos</p>
             </div>
           </div>
           
@@ -334,7 +336,7 @@ const WorkoutTracker = () => {
             <li>• DS = Drop Set (reduza 30-40% do peso)</li>
             <li>• Elevação Lateral 21s = técnica especial</li>
             <li>• Agachamento Búlgaro = pé traseiro no banco</li>
-            <li>• Treino E = repetições altas para volume</li>
+            <li>• Cadeira Abdutora = glúteo médio (formato redondo)</li>
             <li>• Pernas 2x/semana = máxima hipertrofia</li>
           </ul>
         </div>

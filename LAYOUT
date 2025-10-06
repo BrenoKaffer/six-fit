@@ -1,0 +1,641 @@
+```json
+{
+  "app_name": "Workout Tracker - Ombro 3D + Perna de Jogador",
+  "version": "1.0.0",
+  "description": "Aplicativo de acompanhamento de treino com 5 programas (A, B, C, D, E) focado em desenvolvimento de ombros 3D, pernas com leg sweep e glúteos volumosos.",
+  
+  "dependencies": {
+    "runtime": {
+      "react": "^18.2.0",
+      "react-dom": "^18.2.0"
+    },
+    "ui_icons": {
+      "lucide-react": "^0.263.1"
+    },
+    "styling": {
+      "tailwindcss": "^3.3.0",
+      "postcss": "^8.4.0",
+      "autoprefixer": "^10.4.0"
+    },
+    "development": {
+      "@vitejs/plugin-react": "^4.0.0",
+      "vite": "^4.4.0"
+    }
+  },
+
+  "icons_used": {
+    "lucide_react_imports": [
+      "CheckSquare",
+      "Square", 
+      "Calendar",
+      "Target",
+      "Flame",
+      "Clock",
+      "Bike"
+    ]
+  },
+
+  "tailwind_config": {
+    "colors_used": [
+      "bg-blue-600",
+      "bg-red-600", 
+      "bg-green-600",
+      "bg-purple-600",
+      "bg-orange-600",
+      "bg-gray-100",
+      "bg-gray-200",
+      "bg-gray-400",
+      "text-blue-600",
+      "text-red-600",
+      "text-green-600",
+      "text-purple-600",
+      "text-orange-600",
+      "text-gray-600",
+      "text-gray-700",
+      "text-gray-800"
+    ],
+    "note": "Usar apenas classes utilitárias do Tailwind CSS core (sem compilador customizado)"
+  },
+
+  "layout_structure": {
+    "container": {
+      "class": "min-h-screen bg-gray-100 p-4",
+      "max_width": "max-w-md mx-auto",
+      "description": "Container principal responsivo otimizado para mobile"
+    },
+
+    "sections": [
+      {
+        "section_name": "Header Card",
+        "class": "bg-white rounded-lg shadow-md p-6 mb-4",
+        "components": [
+          {
+            "name": "Title Section",
+            "elements": [
+              {
+                "type": "icon",
+                "component": "Target",
+                "size": 28,
+                "color": "text-blue-600"
+              },
+              {
+                "type": "heading",
+                "text": "Workout Tracker",
+                "class": "text-xl font-bold text-gray-800"
+              },
+              {
+                "type": "subtitle",
+                "text": "Ombro 3D + Perna de Jogador + Glúteos",
+                "class": "text-gray-600 text-sm"
+              }
+            ]
+          },
+          {
+            "name": "Workout Selector Buttons",
+            "layout": "flex gap-2",
+            "buttons": [
+              {
+                "id": "A",
+                "color": "bg-blue-600",
+                "label": "A"
+              },
+              {
+                "id": "B", 
+                "color": "bg-red-600",
+                "label": "B"
+              },
+              {
+                "id": "C",
+                "color": "bg-green-600", 
+                "label": "C"
+              },
+              {
+                "id": "D",
+                "color": "bg-purple-600",
+                "label": "D"
+              },
+              {
+                "id": "E",
+                "color": "bg-orange-600",
+                "label": "E"
+              }
+            ],
+            "button_class": "flex-1 py-2 px-3 rounded font-semibold text-sm",
+            "active_state": "background color matching workout + text-white",
+            "inactive_state": "bg-gray-200 text-gray-700"
+          },
+          {
+            "name": "Progress Bar",
+            "components": [
+              {
+                "type": "label",
+                "text": "Progresso",
+                "class": "text-sm font-medium text-gray-700"
+              },
+              {
+                "type": "percentage",
+                "class": "text-sm font-bold text-gray-900",
+                "format": "XX%"
+              },
+              {
+                "type": "progress_bar",
+                "container": "w-full bg-gray-200 rounded-full h-3",
+                "fill": "h-3 rounded-full transition-all duration-300",
+                "fill_color": "matches selected workout color",
+                "width": "dynamic based on completion percentage"
+              }
+            ]
+          }
+        ]
+      },
+
+      {
+        "section_name": "Current Workout Card",
+        "class": "bg-white rounded-lg shadow-md mb-4",
+        "components": [
+          {
+            "name": "Workout Header",
+            "class": "workout color + text-white p-4 rounded-t-lg",
+            "elements": [
+              {
+                "type": "heading",
+                "text": "TREINO [X] - [NOME DO TREINO]",
+                "class": "font-bold text-lg"
+              },
+              {
+                "type": "day_info",
+                "icon": "Calendar",
+                "icon_size": 16,
+                "text": "[DIA DA SEMANA]",
+                "class": "text-sm"
+              }
+            ]
+          },
+          {
+            "name": "Exercise List",
+            "class": "p-4",
+            "item_structure": {
+              "container": "flex items-center gap-3 p-3 border-b border-gray-100 last:border-b-0",
+              "components": [
+                {
+                  "type": "checkbox_button",
+                  "unchecked_icon": "Square (text-gray-400, size 24)",
+                  "checked_icon": "CheckSquare (text-green-600, size 24)",
+                  "functionality": "toggle exercise completion"
+                },
+                {
+                  "type": "exercise_info",
+                  "class": "flex-1 min-w-0",
+                  "elements": [
+                    {
+                      "type": "exercise_name",
+                      "class": "font-medium text-sm text-gray-800",
+                      "completed_class": "line-through text-gray-500"
+                    },
+                    {
+                      "type": "sets_reps",
+                      "format": "[SETS] × [REPS]",
+                      "class": "text-xs text-gray-600"
+                    },
+                    {
+                      "type": "cardio_icon",
+                      "condition": "if exercise type is CARDIO",
+                      "icons": {
+                        "bike": "Bike (size 12, text-red-600)",
+                        "treadmill": "Clock (size 12, text-red-600)"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "type_badge",
+                  "class": "px-2 py-1 rounded text-xs font-bold",
+                  "variants": {
+                    "NORMAL": "text-blue-600 bg-blue-100",
+                    "DROP SET": "text-orange-600 bg-orange-100",
+                    "ESPECIAL": "text-purple-600 bg-purple-100",
+                    "CARDIO": "text-red-600 bg-red-100"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "Complete Workout Button",
+            "class_enabled": "w-full mt-4 py-3 px-4 rounded-lg font-bold text-white bg-green-600 hover:bg-green-700 transition-all",
+            "class_disabled": "w-full mt-4 py-3 px-4 rounded-lg font-bold text-white bg-gray-400 cursor-not-allowed",
+            "text_100_percent": "🔥 FINALIZAR TREINO 🔥",
+            "text_incomplete": "Faltam [X] exercícios",
+            "disabled_when": "progress < 100%"
+          }
+        ]
+      },
+
+      {
+        "section_name": "Workout History Card",
+        "class": "bg-white rounded-lg shadow-md mb-4",
+        "condition": "only show if workoutHistory.length > 0",
+        "components": [
+          {
+            "name": "Header",
+            "class": "p-4 border-b border-gray-200",
+            "elements": [
+              {
+                "type": "icon",
+                "component": "Flame",
+                "size": 20,
+                "color": "text-orange-600"
+              },
+              {
+                "type": "heading",
+                "text": "Histórico de Treinos",
+                "class": "font-bold text-gray-800"
+              }
+            ]
+          },
+          {
+            "name": "History Items",
+            "class": "p-4",
+            "item_structure": {
+              "container": "flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0",
+              "components": [
+                {
+                  "type": "workout_badge",
+                  "class": "w-8 h-8 rounded-full [workout-color] flex items-center justify-center text-white font-bold text-sm",
+                  "content": "[A/B/C/D/E]"
+                },
+                {
+                  "type": "workout_name",
+                  "class": "text-gray-800 font-medium text-sm",
+                  "format": "[WORKOUT NAME without 'TREINO X - ']"
+                },
+                {
+                  "type": "date",
+                  "class": "text-gray-600 text-xs",
+                  "format": "DD/MM/YYYY (pt-BR locale)"
+                }
+              ]
+            }
+          }
+        ]
+      },
+
+      {
+        "section_name": "Weekly Schedule Card",
+        "class": "bg-white rounded-lg shadow-md mb-4 p-4",
+        "components": [
+          {
+            "name": "Header",
+            "text": "📅 Cronograma Semanal",
+            "class": "font-bold text-gray-800 mb-3"
+          },
+          {
+            "name": "Schedule Items",
+            "class": "space-y-2",
+            "items": [
+              {
+                "day": "Segunda",
+                "workout": "A",
+                "color": "bg-blue-600",
+                "description": "Costas/Bíceps"
+              },
+              {
+                "day": "Terça",
+                "workout": "B",
+                "color": "bg-red-600",
+                "description": "Peito/Ombros/Tríceps"
+              },
+              {
+                "day": "Quarta",
+                "workout": "C",
+                "color": "bg-green-600",
+                "description": "Pernas (Pesado)"
+              },
+              {
+                "day": "Quinta",
+                "workout": "-",
+                "color": "bg-gray-400",
+                "description": "Descanso/Cardio"
+              },
+              {
+                "day": "Sexta",
+                "workout": "D",
+                "color": "bg-purple-600",
+                "description": "Ombros Especializados"
+              },
+              {
+                "day": "Sábado",
+                "workout": "E",
+                "color": "bg-orange-600",
+                "description": "Pernas (Volume/Bomba)"
+              },
+              {
+                "day": "Domingo",
+                "workout": "-",
+                "color": "bg-gray-400",
+                "description": "Descanso Total"
+              }
+            ],
+            "item_structure": {
+              "container": "flex items-center gap-2",
+              "badge": "w-6 h-6 rounded-full [color] flex items-center justify-center text-white text-xs font-bold",
+              "text": "text-sm text-gray-700"
+            }
+          }
+        ]
+      },
+
+      {
+        "section_name": "Tips Card",
+        "class": "bg-blue-50 border-l-4 border-blue-600 p-4 rounded",
+        "components": [
+          {
+            "name": "Header",
+            "text": "💡 Dicas Importantes:",
+            "class": "font-bold text-blue-800 mb-2"
+          },
+          {
+            "name": "Tips List",
+            "class": "text-blue-700 text-sm space-y-1",
+            "items": [
+              "• Foque na técnica perfeita",
+              "• DS = Drop Set (reduza 30-40% do peso)",
+              "• Elevação Lateral 21s = técnica especial",
+              "• Agachamento Búlgaro = pé traseiro no banco",
+              "• Abdução = glúteos / Adução = parte interna",
+              "• Pernas 2x/semana = máxima hipertrofia"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+
+  "data_structure": {
+    "workouts": {
+      "A": {
+        "name": "TREINO A - COSTAS E BÍCEPS",
+        "day": "Segunda-feira",
+        "color": "bg-blue-600",
+        "cardio": "Esteira 10 min",
+        "exercises": [
+          {
+            "id": "a1",
+            "name": "Puxada Anterior Aberta",
+            "reps": "8 + 8",
+            "sets": "4x",
+            "type": "DS"
+          }
+        ]
+      },
+      "B": {
+        "name": "TREINO B - PEITO, OMBROS E TRÍCEPS",
+        "day": "Terça-feira",
+        "color": "bg-red-600",
+        "cardio": "Esteira 10 min",
+        "exercises": []
+      },
+      "C": {
+        "name": "TREINO C - PERNAS 'LEG SWEEP'",
+        "day": "Quarta-feira",
+        "color": "bg-green-600",
+        "cardio": "Bicicleta 10 min",
+        "exercises": []
+      },
+      "D": {
+        "name": "TREINO D - OMBROS ESPECIALIZADOS",
+        "day": "Sexta-feira",
+        "color": "bg-purple-600",
+        "cardio": "Esteira 10 min",
+        "exercises": []
+      },
+      "E": {
+        "name": "TREINO E - PERNAS VOLUME/BOMBA",
+        "day": "Sábado",
+        "color": "bg-orange-600",
+        "cardio": "Bicicleta 10 min",
+        "exercises": []
+      }
+    },
+    
+    "exercise_types": {
+      "N": {
+        "label": "NORMAL",
+        "color": "text-blue-600 bg-blue-100"
+      },
+      "DS": {
+        "label": "DROP SET",
+        "color": "text-orange-600 bg-orange-100"
+      },
+      "SP": {
+        "label": "ESPECIAL",
+        "color": "text-purple-600 bg-purple-100"
+      },
+      "CARDIO": {
+        "label": "CARDIO",
+        "color": "text-red-600 bg-red-100"
+      }
+    }
+  },
+
+  "state_management": {
+    "currentWorkout": {
+      "type": "string",
+      "default": "A",
+      "options": ["A", "B", "C", "D", "E"]
+    },
+    "completedExercises": {
+      "type": "object",
+      "structure": {
+        "[workoutId]-[exerciseId]": "boolean"
+      },
+      "example": {
+        "A-a1": true,
+        "A-a2": false
+      }
+    },
+    "workoutHistory": {
+      "type": "array",
+      "structure": [
+        {
+          "workout": "string (A/B/C/D/E)",
+          "date": "string (DD/MM/YYYY)",
+          "completed": "boolean"
+        }
+      ],
+      "max_items": 10
+    }
+  },
+
+  "functionality": {
+    "toggleExercise": {
+      "description": "Marca/desmarca exercício como completo",
+      "parameters": ["workoutId", "exerciseId"],
+      "updates": "completedExercises state"
+    },
+    "getProgress": {
+      "description": "Calcula porcentagem de conclusão do treino",
+      "parameters": ["workoutId"],
+      "returns": "number (0-100)",
+      "formula": "Math.round((completed / total) * 100)"
+    },
+    "completeWorkout": {
+      "description": "Finaliza treino e salva no histórico",
+      "condition": "progress === 100%",
+      "actions": [
+        "Add entry to workoutHistory",
+        "Reset completedExercises for current workout",
+        "Show success alert",
+        "Limit history to 10 most recent entries"
+      ]
+    }
+  },
+
+  "responsive_design": {
+    "breakpoints": {
+      "mobile": "default (max-w-md)",
+      "note": "App otimizado primariamente para mobile/vertical"
+    },
+    "touch_targets": {
+      "minimum_size": "44x44px",
+      "buttons": "py-2 px-3 ou py-3 px-4",
+      "checkboxes": "24x24px icon size"
+    }
+  },
+
+  "accessibility": {
+    "features": [
+      "Semantic HTML elements",
+      "Proper button elements for interactions",
+      "Color contrast ratios meet WCAG AA standards",
+      "Touch-friendly target sizes",
+      "Clear visual feedback for completed exercises"
+    ]
+  },
+
+  "browser_compatibility": {
+    "minimum_requirements": {
+      "chrome": "90+",
+      "firefox": "88+",
+      "safari": "14+",
+      "edge": "90+"
+    },
+    "note": "Modern ES6+ features used, no IE11 support"
+  },
+
+  "performance_considerations": {
+    "react_optimizations": [
+      "Use React.memo for exercise list items if performance issues",
+      "Debounce toggleExercise if rapid clicking causes issues"
+    ],
+    "css": [
+      "Use Tailwind's purge/JIT mode to minimize CSS bundle",
+      "Animations limited to transitions for performance"
+    ]
+  },
+
+  "future_enhancements": {
+    "potential_features": [
+      "Local storage persistence",
+      "Export workout history",
+      "Weight tracking per exercise",
+      "Rest timer between sets",
+      "Custom workout creation",
+      "Progress photos",
+      "Statistics and charts"
+    ]
+  },
+
+  "installation_instructions": {
+    "steps": [
+      "npm create vite@latest workout-tracker -- --template react",
+      "cd workout-tracker",
+      "npm install",
+      "npm install lucide-react",
+      "npm install -D tailwindcss postcss autoprefixer",
+      "npx tailwindcss init -p",
+      "Configure tailwind.config.js content paths",
+      "Add Tailwind directives to index.css",
+      "Copy WorkoutTracker component code",
+      "npm run dev"
+    ]
+  },
+
+  "tailwind_config_file": {
+    "content": [
+      "./index.html",
+      "./src/**/*.{js,ts,jsx,tsx}"
+    ],
+    "theme": {
+      "extend": {}
+    },
+    "plugins": []
+  },
+
+  "index_css": {
+    "directives": [
+      "@tailwind base;",
+      "@tailwind components;",
+      "@tailwind utilities;"
+    ]
+  },
+
+  "deployment": {
+    "build_command": "npm run build",
+    "output_directory": "dist",
+    "hosting_options": [
+      "Vercel",
+      "Netlify", 
+      "GitHub Pages",
+      "Any static hosting service"
+    ]
+  }
+}
+```
+
+**📝 NOTAS ADICIONAIS PARA O TIME DE DESENVOLVIMENTO:**
+
+### **🔑 PONTOS CRÍTICOS:**
+
+1. **Não usar localStorage/sessionStorage** - Este app é stateless por sessão
+2. **Tailwind apenas classes core** - Sem compiler customizado
+3. **Mobile-first** - Layout otimizado para vertical/celular
+4. **React 18+** - Usar hooks modernos (useState, useEffect)
+
+### **🎨 DESIGN TOKENS:**
+
+**Cores dos Treinos:**
+- A: `#2563eb` (blue-600)
+- B: `#dc2626` (red-600)
+- C: `#16a34a` (green-600)
+- D: `#9333ea` (purple-600)
+- E: `#ea580c` (orange-600)
+
+### **📦 PACKAGE.JSON EXEMPLO:**
+
+```json
+{
+  "name": "workout-tracker",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "lucide-react": "^0.263.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.0.0",
+    "autoprefixer": "^10.4.14",
+    "postcss": "^8.4.27",
+    "tailwindcss": "^3.3.3",
+    "vite": "^4.4.5"
+  }
+}
+```
+
+**Pronto para desenvolvimento! 🚀💪🏻**

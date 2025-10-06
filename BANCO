@@ -1,0 +1,25 @@
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
+
+CREATE TABLE public.exercise_entries (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  user_id uuid,
+  workout_id text NOT NULL CHECK (workout_id = ANY (ARRAY['A'::text, 'B'::text, 'C'::text, 'D'::text, 'E'::text])),
+  exercise_id text NOT NULL,
+  date date NOT NULL DEFAULT CURRENT_DATE,
+  load text,
+  note text,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT exercise_entries_pkey PRIMARY KEY (id),
+  CONSTRAINT exercise_entries_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.workout_completions (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  user_id uuid NOT NULL,
+  workout_id text NOT NULL CHECK (workout_id = ANY (ARRAY['A'::text, 'B'::text, 'C'::text, 'D'::text, 'E'::text])),
+  date date NOT NULL DEFAULT CURRENT_DATE,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT workout_completions_pkey PRIMARY KEY (id),
+  CONSTRAINT workout_completions_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
+);

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { CheckSquare, Square, Calendar, Target, Flame, Clock, Bike } from 'lucide-react'
+import { supabase } from '../lib/supabaseClient'
 
 // Tipos para garantir compatibilidade com TypeScript estrito
 type ExerciseType = 'DS' | 'SP' | 'CARDIO' | 'N'
@@ -119,6 +120,15 @@ const WorkoutTracker: React.FC = () => {
   const [completedExercises, setCompletedExercises] = useState<Record<string, boolean>>({})
   const [workoutHistory, setWorkoutHistory] = useState<Array<{ workout: WorkoutKey; date: string; completed: boolean }>>([])
 
+  // Estado para carga e anotação por exercício
+  const [exerciseNotes, setExerciseNotes] = useState<Record<string, { load: string; note: string }>>({})
+  // Controle de modal e seleção atual
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selected, setSelected] = useState<{ workoutId: WorkoutKey; exercise: Exercise } | null>(null)
+  // Estados temporários do formulário do modal
+  const [tempLoad, setTempLoad] = useState('')
+  const [tempNote, setTempNote] = useState('')
+
   const toggleExercise = (workoutId: WorkoutKey, exerciseId: string) => {
     const key = `${workoutId}-${exerciseId}`
     setCompletedExercises(prev => ({
@@ -127,13 +137,83 @@ const WorkoutTracker: React.FC = () => {
     }))
   }
 
-  const getProgress = (workoutId: WorkoutKey) => {
-    const exercises = workouts[workoutId].exercises
-    const completed = exercises.filter(ex => completedExercises[`${workoutId}-${ex.id}`]).length
-    return Math.round((completed / exercises.length) * 100)
+  // Abrir modal para editar carga/anotação
+  const openExerciseModal = async (workoutId: WorkoutKey, exercise: Exercise) => {
+    const key = `${workoutId}-${exercise.id}`
+
+    // Pré-preenche com estado local, e tenta substituir com servidor se disponível
+    const existing = exerciseNotes[key] || { load: '', note: '' }
+    setTempLoad(existing.load || '')
+    setTempNote(existing.note || '')
+
+    try {
+      // Tenta usar a view com o último registro
+      const { data, error } = await supabase
+        .from('exercise_entries_latest')
+        .select('load, note')
+        .eq('workout_id', workoutId)
+        .eq('exercise_id', exercise.id)
+        .limit(1)
+
+      if (!error && data && data.length > 0) {
+        setTempLoad(data[0].load || '')
+        setTempNote(data[0].note || '')
+      } else {
+        // Fallback para a tabela base
+        const { data: dataBase, error: errorBase } = await supabase
+          .from('exercise_entries')
+          .select('load, note')
+          .eq('workout_id', workoutId)
+          .eq('exercise_id', exercise.id)
+          .order('date', { ascending: false })
+          .limit(1)
+        if (!errorBase && dataBase && dataBase.length > 0) {
+          setTempLoad(dataBase[0].load || '')
+          setTempNote(dataBase[0].note || '')
+        }
+      }
+    } catch (e) {
+      // Mantém valores locais em caso de erro de rede/servidor
+    }
+
+    setSelected({ workoutId, exercise })
+    setIsModalOpen(true)
   }
 
-  const completeWorkout = () => {
+  // Salvar dados do modal
+  const saveExerciseModal = async () => {
+    if (!selected) return
+    const key = `${selected.workoutId}-${selected.exercise.id}`
+
+    // Atualiza estado local sempre
+    setExerciseNotes(prev => ({
+      ...prev,
+      [key]: { load: tempLoad, note: tempNote },
+    }))
+
+    // Persistir no Supabase sem autenticação
+    try {
+      const { error } = await supabase
+        .from('exercise_entries')
+        .upsert({
+          workout_id: selected.workoutId,
+          exercise_id: selected.exercise.id,
+          load: tempLoad || null,
+          note: tempNote || null,
+          date: new Date().toISOString().slice(0, 10),
+        })
+      if (error) {
+        console.error('Erro ao salvar no Supabase:', error.message)
+      }
+    } catch (e) {
+      console.error('Falha ao comunicar com Supabase:', e)
+    }
+
+    setIsModalOpen(false)
+    setSelected(null)
+  }
+
+  const completeWorkout = async () => {
     const progress = getProgress(currentWorkout)
     if (progress === 100) {
       const newEntry = {
@@ -152,6 +232,22 @@ const WorkoutTracker: React.FC = () => {
           [key]: false,
         }))
       })
+
+      // Persistir conclusão no Supabase (modo sem autenticação)
+      try {
+        const today = new Date().toISOString().slice(0, 10)
+        const { error } = await supabase
+          .from('workout_completions')
+          .insert({
+            workout_id: currentWorkout,
+            date: today,
+          })
+        if (error) {
+          console.error('Erro ao registrar conclusão no Supabase:', error.message)
+        }
+      } catch (e) {
+        console.error('Falha ao comunicar com Supabase (workout_completions):', e)
+      }
 
       alert(`🔥 Treino ${currentWorkout} concluído! Excelente trabalho! 💪`)
     } else {
@@ -190,6 +286,13 @@ const WorkoutTracker: React.FC = () => {
     if (progress === 100) return 'bg-green-600'
     if (progress >= 50) return 'bg-yellow-500'
     return 'bg-gray-400'
+  }
+
+  // Percentual de conclusão do treino atual
+  const getProgress = (workoutId: WorkoutKey) => {
+    const exercises = workouts[workoutId].exercises
+    const completed = exercises.filter(ex => completedExercises[`${workoutId}-${ex.id}`]).length
+    return Math.round((completed / exercises.length) * 100)
   }
 
   const currentProgress = getProgress(currentWorkout)
@@ -263,7 +366,7 @@ const WorkoutTracker: React.FC = () => {
                   )}
                 </button>
 
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 cursor-pointer" onClick={() => openExerciseModal(currentWorkout, exercise)}>
                   <h3
                     className={`font-medium text-sm ${
                       completedExercises[`${currentWorkout}-${exercise.id}`]
@@ -273,8 +376,14 @@ const WorkoutTracker: React.FC = () => {
                   >
                     {exercise.name}
                   </h3>
-                  <div className="flex items-center gap-2 mt-1">
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
                     <span className="text-xs text-gray-600">{exercise.sets} × {exercise.reps}</span>
+                    {exerciseNotes[`${currentWorkout}-${exercise.id}`]?.load && (
+                      <span className="text-xs text-gray-600">• carga: {exerciseNotes[`${currentWorkout}-${exercise.id}`]?.load}</span>
+                    )}
+                    {exerciseNotes[`${currentWorkout}-${exercise.id}`]?.note && (
+                      <span className="text-xs text-gray-500 truncate max-w-[160px]">• {exerciseNotes[`${currentWorkout}-${exercise.id}`]?.note}</span>
+                    )}
                   </div>
                 </div>
 
@@ -359,6 +468,44 @@ const WorkoutTracker: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {isModalOpen && selected && (
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50" onClick={() => { setIsModalOpen(false); setSelected(null); }}>
+            <div className="bg-white rounded-lg shadow-lg w-11/12 max-w-sm" onClick={e => e.stopPropagation()}>
+              <div className={`${workouts[selected.workoutId].color} text-white p-4 rounded-t-lg`}>
+                <h4 className="font-bold text-sm">{selected.exercise.name}</h4>
+                <p className="text-xs opacity-90">{selected.exercise.sets} × {selected.exercise.reps}</p>
+              </div>
+              <div className="p-4 space-y-3">
+                <div>
+                  <label className="text-xs font-medium text-gray-700">Carga</label>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="ex: 20 kg"
+                    value={tempLoad}
+                    onChange={e => setTempLoad(e.target.value)}
+                    className="mt-1 w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-700">Anotação</label>
+                  <textarea
+                    rows={3}
+                    placeholder="Notas rápidas..."
+                    value={tempNote}
+                    onChange={e => setTempNote(e.target.value)}
+                    className="mt-1 w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  />
+                </div>
+                <div className="flex gap-2 pt-2">
+                  <button onClick={() => { setIsModalOpen(false); setSelected(null); }} className="flex-1 py-2 rounded bg-gray-200 text-gray-800 font-semibold">Cancelar</button>
+                  <button onClick={saveExerciseModal} className="flex-1 py-2 rounded bg-blue-600 text-white font-bold">Salvar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Dicas */}
         <div className="bg-blue-50 border-l-4 border-blue-600 p-4 rounded">
