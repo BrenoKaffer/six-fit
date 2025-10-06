@@ -306,7 +306,7 @@ const WorkoutTracker: React.FC = () => {
             <Target className="text-blue-600" size={28} />
             <div>
               <h1 className="text-xl font-bold text-gray-800">Workout Tracker</h1>
-              <p className="text-gray-600 text-sm">Ombro 3D + Perna de Jogador + Glúteos</p>
+              <p className="text-gray-600 text-sm">Não negocie com a mente</p>
             </div>
           </div>
 
