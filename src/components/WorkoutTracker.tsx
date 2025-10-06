@@ -275,15 +275,6 @@ const WorkoutTracker: React.FC = () => {
                   </h3>
                   <div className="flex items-center gap-2 mt-1">
                     <span className="text-xs text-gray-600">{exercise.sets} × {exercise.reps}</span>
-                    {exercise.type === 'CARDIO' && (
-                      <div className="flex items-center gap-1">
-                        {exercise.name.includes('Bicicleta') ? (
-                          <Bike size={12} className="text-red-600" />
-                        ) : (
-                          <Clock size={12} className="text-red-600" />
-                        )}
-                      </div>
-                    )}
                   </div>
                 </div>
 
@@ -339,31 +330,31 @@ const WorkoutTracker: React.FC = () => {
           <h3 className="font-bold text-gray-800 mb-3">📅 Cronograma Semanal</h3>
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold">A</div>
+              <div className="w-3 h-3 rounded-full bg-blue-600"></div>
               <span className="text-sm text-gray-700">Segunda - Costas/Bíceps</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-red-600 flex items-center justify-center text-white text-xs font-bold">B</div>
+              <div className="w-3 h-3 rounded-full bg-red-600"></div>
               <span className="text-sm text-gray-700">Terça - Peito/Ombros/Tríceps</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-green-600 flex items-center justify-center text-white text-xs font-bold">C</div>
+              <div className="w-3 h-3 rounded-full bg-green-600"></div>
               <span className="text-sm text-gray-700">Quarta - Pernas (Pesado)</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-gray-400 flex items-center justify-center text-white text-xs font-bold">-</div>
+              <div className="w-3 h-3 rounded-full bg-gray-400"></div>
               <span className="text-sm text-gray-700">Quinta - Descanso/Cardio</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center text-white text-xs font-bold">D</div>
+              <div className="w-3 h-3 rounded-full bg-purple-600"></div>
               <span className="text-sm text-gray-700">Sexta - Ombros Especializados</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-orange-600 flex items-center justify-center text-white text-xs font-bold">E</div>
+              <div className="w-3 h-3 rounded-full bg-orange-600"></div>
               <span className="text-sm text-gray-700">Sábado - Pernas (Volume/Bomba)</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-gray-400 flex items-center justify-center text-white text-xs font-bold">-</div>
+              <div className="w-3 h-3 rounded-full bg-gray-400"></div>
               <span className="text-sm text-gray-700">Domingo - Descanso Total</span>
             </div>
           </div>
