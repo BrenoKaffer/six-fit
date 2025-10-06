@@ -185,6 +185,13 @@ const WorkoutTracker: React.FC = () => {
     }
   }
 
+  // Cor dinâmica da barra de progresso conforme percentual
+  const getProgressColor = (progress: number) => {
+    if (progress === 100) return 'bg-green-600'
+    if (progress >= 50) return 'bg-yellow-500'
+    return 'bg-gray-400'
+  }
+
   const currentProgress = getProgress(currentWorkout)
 
   return (
@@ -222,7 +229,7 @@ const WorkoutTracker: React.FC = () => {
               <span className="text-sm font-bold text-gray-900">{currentProgress}%</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-3">
-              <div className={`h-3 rounded-full transition-all duration-300 ${workouts[currentWorkout].color}`} style={{ width: `${currentProgress}%` }}></div>
+              <div className={`h-3 rounded-full transition-all duration-300 ${getProgressColor(currentProgress)}`} style={{ width: `${currentProgress}%` }}></div>
             </div>
           </div>
         </div>
@@ -234,6 +241,14 @@ const WorkoutTracker: React.FC = () => {
             <div className="flex items-center gap-2 mt-2">
               <Calendar size={16} />
               <span className="text-sm">{workouts[currentWorkout].day}</span>
+            </div>
+            <div className="flex items-center gap-2 mt-1">
+              {workouts[currentWorkout].cardio.includes('Bicicleta') ? (
+                <Bike size={16} />
+              ) : (
+                <Clock size={16} />
+              )}
+              <span className="text-sm">{workouts[currentWorkout].cardio}</span>
             </div>
           </div>
 
@@ -286,8 +301,7 @@ const WorkoutTracker: React.FC = () => {
               {currentProgress === 100
                 ? '🔥 FINALIZAR TREINO 🔥'
                 : `Faltam ${
-                    workouts[currentWorkout].exercises.length -
-                    Math.round((currentProgress / 100) * workouts[currentWorkout].exercises.length)
+                    workouts[currentWorkout].exercises.filter(ex => !completedExercises[`${currentWorkout}-${ex.id}`]).length
                   } exercícios`}
             </button>
           </div>
@@ -363,7 +377,8 @@ const WorkoutTracker: React.FC = () => {
             <li>• DS = Drop Set (reduza 30-40% do peso)</li>
             <li>• Elevação Lateral 21s = técnica especial</li>
             <li>• Agachamento Búlgaro = pé traseiro no banco</li>
-            <li>• Cadeira Abdutora = glúteo médio (formato redondo)</li>
+            <li>• Abdução: glúteo médio (formato redondo)</li>
+            <li>• Adução: adutores (fechamento das pernas)</li>
             <li>• Pernas 2x/semana = máxima hipertrofia</li>
           </ul>
         </div>
