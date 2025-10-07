@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { CheckSquare, Square, Calendar, Target, Flame, Clock, Bike } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
 
@@ -129,6 +129,67 @@ const WorkoutTracker: React.FC = () => {
   const [tempLoad, setTempLoad] = useState('')
   const [tempNote, setTempNote] = useState('')
 
+  // Persistência/Hidratação: carregar últimos estados ao montar
+  useEffect(() => {
+    const hydrate = async () => {
+      try {
+        const { data: userRes } = await supabase.auth.getUser()
+        const userId = userRes?.user?.id || null
+
+        // localStorage hydration
+        const savedCompleted = localStorage.getItem('completedExercises')
+        if (savedCompleted) setCompletedExercises(JSON.parse(savedCompleted))
+        const savedHistory = localStorage.getItem('workoutHistory')
+        if (savedHistory) setWorkoutHistory(JSON.parse(savedHistory))
+        const savedWorkout = localStorage.getItem('currentWorkout') as WorkoutKey | null
+        if (savedWorkout) setCurrentWorkout(savedWorkout)
+        const savedNotes = localStorage.getItem('exerciseNotes')
+        if (savedNotes) setExerciseNotes(JSON.parse(savedNotes))
+
+        // server hydration (últimas cargas/anotações + histórico)
+        if (userId) {
+          const { data: latest, error: latestErr } = await supabase
+            .from('exercise_entries_latest')
+            .select('workout_id, exercise_id, load, note')
+            .eq('user_id', userId)
+          if (!latestErr && latest) {
+            const notesMap: Record<string, { load: string; note: string }> = {}
+            latest.forEach((row: any) => {
+              const key = `${row.workout_id}-${row.exercise_id}`
+              notesMap[key] = { load: row.load || '', note: row.note || '' }
+            })
+            if (Object.keys(notesMap).length > 0) setExerciseNotes(prev => ({ ...prev, ...notesMap }))
+          }
+          const { data: comp, error: compErr } = await supabase
+            .from('workout_completions')
+            .select('workout_id, date')
+            .eq('user_id', userId)
+            .order('date', { ascending: false })
+            .limit(10)
+          if (!compErr && comp) {
+            setWorkoutHistory(
+              comp.map((h: any) => ({ workout: h.workout_id as WorkoutKey, date: new Date(h.date).toLocaleDateString('pt-BR'), completed: true }))
+            )
+          }
+        }
+      } catch (_) {}
+    }
+    hydrate()
+  }, [])
+
+  // Persistência automática em localStorage
+  useEffect(() => {
+    localStorage.setItem('completedExercises', JSON.stringify(completedExercises))
+  }, [completedExercises])
+  useEffect(() => {
+    localStorage.setItem('workoutHistory', JSON.stringify(workoutHistory))
+  }, [workoutHistory])
+  useEffect(() => {
+    if (currentWorkout) localStorage.setItem('currentWorkout', currentWorkout)
+  }, [currentWorkout])
+  useEffect(() => {
+    localStorage.setItem('exerciseNotes', JSON.stringify(exerciseNotes))
+  }, [exerciseNotes])
   const toggleExercise = (workoutId: WorkoutKey, exerciseId: string) => {
     const key = `${workoutId}-${exerciseId}`
     setCompletedExercises(prev => ({

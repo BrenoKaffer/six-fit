@@ -1,7 +1,31 @@
 -- User Profiles centralization SQL (Supabase)
--- This script creates the view, table, functions and triggers to keep user_profiles synchronized
+-- This script creates the base tables (if missing), view, table, functions and triggers to keep user_profiles synchronized
+
+-- BASE TABLES: dependências para a view e triggers
+CREATE TABLE IF NOT EXISTS public.exercise_entries (
+  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  user_id uuid,
+  workout_id text NOT NULL CHECK (workout_id = ANY (ARRAY['A','B','C','D','E'])),
+  exercise_id text NOT NULL,
+  date date NOT NULL DEFAULT CURRENT_DATE,
+  load text,
+  note text,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT exercise_entries_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
+);
+
+CREATE TABLE IF NOT EXISTS public.workout_completions (
+  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  user_id uuid,
+  workout_id text NOT NULL CHECK (workout_id = ANY (ARRAY['A','B','C','D','E'])),
+  date date NOT NULL DEFAULT CURRENT_DATE,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT workout_completions_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
+);
 
 -- VIEW: últimas entradas por exercício e usuário
+DROP VIEW IF EXISTS public.exercise_entries_latest;
 CREATE OR REPLACE VIEW public.exercise_entries_latest AS
 WITH ranked AS (
   SELECT
@@ -18,6 +42,7 @@ FROM ranked
 WHERE rn = 1;
 
 -- TABELA: user_profiles (dados centralizados por usuário)
+DROP TABLE IF EXISTS public.user_profiles;
 CREATE TABLE IF NOT EXISTS public.user_profiles (
   id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email text,
@@ -28,6 +53,7 @@ CREATE TABLE IF NOT EXISTS public.user_profiles (
 );
 
 -- FUNÇÃO: atualizar/agregar dados em user_profiles
+DROP FUNCTION IF EXISTS public.refresh_user_profiles() CASCADE;
 CREATE OR REPLACE FUNCTION public.refresh_user_profiles()
 RETURNS void
 LANGUAGE plpgsql
@@ -69,6 +95,7 @@ BEGIN
       '[]'::jsonb
     ),
     now()
+  FROM auth.users u
   ON CONFLICT (id) DO UPDATE SET
     email = EXCLUDED.email,
     exercise_entries = EXCLUDED.exercise_entries,
@@ -79,6 +106,7 @@ END;
 $$;
 
 -- TRIGGER helper (statement-level)
+DROP FUNCTION IF EXISTS public.refresh_user_profiles_statement() CASCADE;
 CREATE OR REPLACE FUNCTION public.refresh_user_profiles_statement()
 RETURNS trigger
 LANGUAGE plpgsql
