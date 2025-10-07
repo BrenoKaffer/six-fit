@@ -120,6 +120,11 @@ const WorkoutTracker: React.FC = () => {
   const [completedExercises, setCompletedExercises] = useState<Record<string, boolean>>({})
   const [workoutHistory, setWorkoutHistory] = useState<Array<{ workout: WorkoutKey; date: string; completed: boolean }>>([])
 
+  // Filtro e dados do calendário visual
+  const [calendarFilter, setCalendarFilter] = useState<'week' | 'month' | 'year'>('month')
+  const [anchorDate, setAnchorDate] = useState<Date>(new Date())
+  const [calendarCompletions, setCalendarCompletions] = useState<Set<string>>(new Set())
+
   // Estado para carga e anotação por exercício
   const [exerciseNotes, setExerciseNotes] = useState<Record<string, { load: string; note: string }>>({})
   // Controle de modal e seleção atual
