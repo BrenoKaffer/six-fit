@@ -306,7 +306,7 @@ const WorkoutTracker: React.FC = () => {
             <Target className="text-blue-600" size={28} />
             <div className="flex-1">
               <h1 className="text-xl font-bold text-gray-800">Workout Tracker</h1>
-              <p className="text-gray-600 text-sm">Não negocie com a mente</p>
+              <p className="text-gray-600 text-sm">Não negocie com a sua mente. Just Do It</p>
             </div>
             <button
               onClick={async () => { await supabase.auth.signOut(); }}
