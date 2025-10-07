@@ -57,6 +57,8 @@ DROP FUNCTION IF EXISTS public.refresh_user_profiles() CASCADE;
 CREATE OR REPLACE FUNCTION public.refresh_user_profiles()
 RETURNS void
 LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
 AS $$
 BEGIN
   INSERT INTO public.user_profiles (
@@ -104,18 +106,26 @@ BEGIN
     updated_at = now();
 END;
 $$;
+-- Ensure function owner and grants (run these in Supabase SQL Editor when needed)
+-- ALTER FUNCTION public.refresh_user_profiles() OWNER TO postgres;
+-- GRANT EXECUTE ON FUNCTION public.refresh_user_profiles() TO authenticated;
 
 -- TRIGGER helper (statement-level)
 DROP FUNCTION IF EXISTS public.refresh_user_profiles_statement() CASCADE;
 CREATE OR REPLACE FUNCTION public.refresh_user_profiles_statement()
 RETURNS trigger
 LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
 AS $$
 BEGIN
   PERFORM public.refresh_user_profiles();
   RETURN NULL;
 END;
 $$;
+-- Ensure function owner and grants (run these in Supabase SQL Editor when needed)
+-- ALTER FUNCTION public.refresh_user_profiles_statement() OWNER TO postgres;
+-- GRANT EXECUTE ON FUNCTION public.refresh_user_profiles_statement() TO authenticated;
 
 -- TRIGGERS: manter user_profiles sincronizado
 DROP TRIGGER IF EXISTS trg_refresh_user_profiles_after_exercise_entries ON public.exercise_entries;
