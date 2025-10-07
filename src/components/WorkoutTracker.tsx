@@ -320,6 +320,8 @@ const WorkoutTracker: React.FC = () => {
       }
 
       alert(`🔥 Treino ${currentWorkout} concluído! Excelente trabalho! 💪`)
+      // Avançar automaticamente para o próximo treino
+      setCurrentWorkout(getNextWorkout(currentWorkout))
     } else {
       alert('Complete todos os exercícios antes de finalizar o treino!')
     }
@@ -356,6 +358,17 @@ const WorkoutTracker: React.FC = () => {
     if (progress === 100) return 'bg-green-600'
     if (progress >= 50) return 'bg-yellow-500'
     return 'bg-gray-400'
+  }
+
+  // Próximo treino em sequência A → B → C → D → E → A
+  const getNextWorkout = (wk: WorkoutKey): WorkoutKey => {
+    switch (wk) {
+      case 'A': return 'B'
+      case 'B': return 'C'
+      case 'C': return 'D'
+      case 'D': return 'E'
+      default: return 'A'
+    }
   }
 
   // Percentual de conclusão do treino atual
