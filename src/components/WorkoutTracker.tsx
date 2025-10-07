@@ -128,6 +128,8 @@ const WorkoutTracker: React.FC = () => {
   // Estados temporários do formulário do modal
   const [tempLoad, setTempLoad] = useState('')
   const [tempNote, setTempNote] = useState('')
+  // User id autenticado (para RLS)
+  const [userId, setUserId] = useState<string | null>(null)
 
   // Persistência/Hidratação: carregar últimos estados ao montar
   useEffect(() => {
@@ -135,6 +137,7 @@ const WorkoutTracker: React.FC = () => {
       try {
         const { data: userRes } = await supabase.auth.getUser()
         const userId = userRes?.user?.id || null
+        setUserId(userId)
 
         // localStorage hydration
         const savedCompleted = localStorage.getItem('completedExercises')
@@ -209,25 +212,27 @@ const WorkoutTracker: React.FC = () => {
 
     try {
       // Tenta usar a view com o último registro
-      const { data, error } = await supabase
+      const viewBase = supabase
         .from('exercise_entries_latest')
         .select('load, note')
         .eq('workout_id', workoutId)
         .eq('exercise_id', exercise.id)
         .limit(1)
+      const { data, error } = await (userId ? viewBase.eq('user_id', userId) : viewBase)
 
       if (!error && data && data.length > 0) {
         setTempLoad(data[0].load || '')
         setTempNote(data[0].note || '')
       } else {
         // Fallback para a tabela base
-        const { data: dataBase, error: errorBase } = await supabase
+        const baseQuery = supabase
           .from('exercise_entries')
           .select('load, note')
           .eq('workout_id', workoutId)
           .eq('exercise_id', exercise.id)
           .order('date', { ascending: false })
           .limit(1)
+        const { data: dataBase, error: errorBase } = await (userId ? baseQuery.eq('user_id', userId) : baseQuery)
         if (!errorBase && dataBase && dataBase.length > 0) {
           setTempLoad(dataBase[0].load || '')
           setTempNote(dataBase[0].note || '')
@@ -252,22 +257,27 @@ const WorkoutTracker: React.FC = () => {
       [key]: { load: tempLoad, note: tempNote },
     }))
 
-    // Persistir no Supabase sem autenticação
-    try {
-      const { error } = await supabase
-        .from('exercise_entries')
-        .upsert({
-          workout_id: selected.workoutId,
-          exercise_id: selected.exercise.id,
-          load: tempLoad || null,
-          note: tempNote || null,
-          date: new Date().toISOString().slice(0, 10),
-        })
-      if (error) {
-        console.error('Erro ao salvar no Supabase:', error.message)
+    // Persistir no Supabase (requer usuário autenticado por RLS)
+    if (!userId) {
+      console.warn('Usuário não autenticado — salvando apenas local.')
+    } else {
+      try {
+        const { error } = await supabase
+          .from('exercise_entries')
+          .insert({
+            user_id: userId,
+            workout_id: selected.workoutId,
+            exercise_id: selected.exercise.id,
+            load: tempLoad || null,
+            note: tempNote || null,
+            date: new Date().toISOString().slice(0, 10),
+          })
+        if (error) {
+          console.error('Erro ao salvar no Supabase:', error.message)
+        }
+      } catch (e) {
+        console.error('Falha ao comunicar com Supabase:', e)
       }
-    } catch (e) {
-      console.error('Falha ao comunicar com Supabase:', e)
     }
 
     setIsModalOpen(false)
@@ -297,12 +307,11 @@ const WorkoutTracker: React.FC = () => {
       // Persistir conclusão no Supabase (modo sem autenticação)
       try {
         const today = new Date().toISOString().slice(0, 10)
+        const payload: any = { workout_id: currentWorkout, date: today }
+        if (userId) payload.user_id = userId
         const { error } = await supabase
           .from('workout_completions')
-          .insert({
-            workout_id: currentWorkout,
-            date: today,
-          })
+          .insert(payload)
         if (error) {
           console.error('Erro ao registrar conclusão no Supabase:', error.message)
         }
