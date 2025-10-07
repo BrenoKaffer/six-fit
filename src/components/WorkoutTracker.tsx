@@ -185,6 +185,105 @@ const WorkoutTracker: React.FC = () => {
     hydrate()
   }, [])
 
+  // Helpers de calendário
+  const toISODate = (d: Date) => {
+    const y = d.getFullYear()
+    const m = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${y}-${m}-${day}`
+  }
+  const parsePtBrToISO = (dStr: string) => {
+    const [dd, mm, yyyy] = dStr.split('/')
+    if (!dd || !mm || !yyyy) return ''
+    return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`
+  }
+  const startOfDay = (d: Date) => {
+    const nd = new Date(d)
+    nd.setHours(0, 0, 0, 0)
+    return nd
+  }
+  const addDays = (d: Date, days: number) => {
+    const nd = new Date(d)
+    nd.setDate(nd.getDate() + days)
+    return nd
+  }
+  const getMonday = (d: Date) => {
+    const nd = startOfDay(d)
+    const day = nd.getDay()
+    const diff = (day === 0 ? -6 : 1 - day)
+    return addDays(nd, diff)
+  }
+  const getMonthRange = (d: Date) => {
+    const start = startOfDay(new Date(d.getFullYear(), d.getMonth(), 1))
+    const end = startOfDay(new Date(d.getFullYear(), d.getMonth() + 1, 0))
+    return { start, end }
+  }
+  const getYearRange = (d: Date) => {
+    const start = startOfDay(new Date(d.getFullYear(), 0, 1))
+    const end = startOfDay(new Date(d.getFullYear(), 11, 31))
+    return { start, end }
+  }
+  const getRangeForFilter = (d: Date, filter: 'week' | 'month' | 'year') => {
+    if (filter === 'week') {
+      const start = getMonday(d)
+      const end = addDays(start, 6)
+      return { start, end }
+    }
+    if (filter === 'month') return getMonthRange(d)
+    return getYearRange(d)
+  }
+  const generateDaysForRange = (start: Date, end: Date) => {
+    const days: Date[] = []
+    let cur = new Date(start)
+    while (cur <= end) {
+      days.push(new Date(cur))
+      cur = addDays(cur, 1)
+    }
+    return days
+  }
+
+  // Carregar conclusões no intervalo do filtro
+  useEffect(() => {
+    const loadCompletions = async () => {
+      const { start, end } = getRangeForFilter(anchorDate, calendarFilter)
+      const startISO = toISODate(start)
+      const endISO = toISODate(end)
+      if (userId) {
+        try {
+          const { data, error } = await supabase
+            .from('workout_completions')
+            .select('date')
+            .eq('user_id', userId)
+            .gte('date', startISO)
+            .lte('date', endISO)
+          if (!error && data) {
+            const s = new Set<string>()
+            data.forEach((row: any) => {
+              const iso = toISODate(new Date(row.date))
+              s.add(iso)
+            })
+            setCalendarCompletions(s)
+          }
+        } catch (e) {
+          const s = new Set<string>()
+          workoutHistory.forEach(h => {
+            const iso = parsePtBrToISO(h.date)
+            if (iso) s.add(iso)
+          })
+          setCalendarCompletions(s)
+        }
+      } else {
+        const s = new Set<string>()
+        workoutHistory.forEach(h => {
+          const iso = parsePtBrToISO(h.date)
+          if (iso) s.add(iso)
+        })
+        setCalendarCompletions(s)
+      }
+    }
+    loadCompletions()
+  }, [calendarFilter, anchorDate, userId, workoutHistory])
+
   // Persistência automática em localStorage
   useEffect(() => {
     localStorage.setItem('completedExercises', JSON.stringify(completedExercises))
@@ -527,6 +626,108 @@ const WorkoutTracker: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Calendário visual */}
+        <div className="bg-white rounded-lg shadow-md mb-4">
+          <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+            <h3 className="font-bold text-gray-800 flex items-center gap-2">
+              <Calendar className="text-blue-600" size={20} />
+              Calendário
+            </h3>
+            <div className="flex gap-2">
+              {(['week','month','year'] as const).map(f => (
+                <button
+                  key={f}
+                  onClick={() => setCalendarFilter(f)}
+                  className={`px-3 py-1 rounded text-sm font-semibold border ${calendarFilter === f ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300'}`}
+                >
+                  {f === 'week' ? 'Semana' : f === 'month' ? 'Mês' : 'Ano'}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="p-4">
+            {/* Grid de dias conforme filtro */}
+            {(() => {
+              const { start, end } = getRangeForFilter(anchorDate, calendarFilter)
+              const days = generateDaysForRange(start, end)
+              const todayISO = toISODate(startOfDay(new Date()))
+              const isPast = (iso: string) => iso < todayISO
+              const isTodayOrFuture = (iso: string) => iso >= todayISO
+              const cellClass = (iso: string) => {
+                if (calendarCompletions.has(iso)) return 'bg-green-100 text-green-700 border-green-300'
+                if (isPast(iso)) return 'bg-red-100 text-red-700 border-red-300'
+                return 'bg-gray-100 text-gray-700 border-gray-300'
+              }
+
+              if (calendarFilter === 'year') {
+                // Ano: grade compacta (12 linhas, cada uma com os dias dos meses)
+                const months = Array.from({ length: 12 }, (_, i) => new Date(anchorDate.getFullYear(), i, 1))
+                return (
+                  <div className="space-y-3">
+                    {months.map((m, idx) => {
+                      const { start: ms, end: me } = getMonthRange(m)
+                      const mdays = generateDaysForRange(ms, me)
+                      return (
+                        <div key={idx}>
+                          <div className="text-xs font-bold text-gray-700 mb-1">{m.toLocaleDateString('pt-BR', { month: 'long' }).toUpperCase()}</div>
+                          <div className="grid grid-cols-7 gap-1">
+                            {['S','T','Q','Q','S','S','D'].map((d, i) => (
+                              <div key={i} className="text-[10px] text-gray-500 text-center">{d}</div>
+                            ))}
+                            {/* offset inicial */}
+                            {Array.from({ length: startOfDay(ms).getDay() === 0 ? 0 : startOfDay(ms).getDay() - 1 }).map((_, i) => (
+                              <div key={`off-${i}`}></div>
+                            ))}
+                            {mdays.map((d, i) => {
+                              const iso = toISODate(d)
+                              return (
+                                <div key={i} className={`border rounded p-1 text-center text-xs ${cellClass(iso)}`}>{d.getDate()}</div>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )
+              }
+
+              // Semana/Mês
+              const showWeekHeaders = true
+              return (
+                <div>
+                  {showWeekHeaders && (
+                    <div className="grid grid-cols-7 gap-1 mb-2">
+                      {['S','T','Q','Q','S','S','D'].map((d, i) => (
+                        <div key={i} className="text-[10px] text-gray-500 text-center">{d}</div>
+                      ))}
+                    </div>
+                  )}
+                  <div className="grid grid-cols-7 gap-1">
+                    {/* offset inicial para mês */}
+                    {calendarFilter === 'month' && Array.from({ length: startOfDay(start).getDay() === 0 ? 0 : startOfDay(start).getDay() - 1 }).map((_, i) => (
+                      <div key={`off-${i}`}></div>
+                    ))}
+                    {days.map((d, i) => {
+                      const iso = toISODate(d)
+                      return (
+                        <div key={i} className={`border rounded p-2 text-center text-xs ${cellClass(iso)}`}>{d.getDate()}</div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )
+            })()}
+
+            {/* Legenda */}
+            <div className="flex items-center gap-4 mt-4">
+              <div className="flex items-center gap-2 text-xs text-gray-700"><span className="w-3 h-3 rounded bg-green-200 border border-green-400"></span> Concluído</div>
+              <div className="flex items-center gap-2 text-xs text-gray-700"><span className="w-3 h-3 rounded bg-red-200 border border-red-400"></span> Passado sem conclusão</div>
+              <div className="flex items-center gap-2 text-xs text-gray-700"><span className="w-3 h-3 rounded bg-gray-200 border border-gray-400"></span> Hoje/Futuro</div>
+            </div>
+          </div>
+        </div>
 
         {/* Cronograma semanal */}
         <div className="bg-white rounded-lg shadow-md mb-4 p-4">
