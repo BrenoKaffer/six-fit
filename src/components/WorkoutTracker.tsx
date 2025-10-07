@@ -122,8 +122,48 @@ const WorkoutTracker: React.FC = () => {
 
   // Filtro e dados do calendário visual
   const [calendarFilter, setCalendarFilter] = useState<'week' | 'month' | 'year'>('month')
-  const [anchorDate, setAnchorDate] = useState<Date>(new Date())
+  const [anchorDate] = useState<Date>(new Date())
   const [calendarCompletions, setCalendarCompletions] = useState<Set<string>>(new Set())
+
+  // Timer 1 min (sem som, com vibração)
+  const [timerSeconds, setTimerSeconds] = useState<number>(0)
+  const [timerActive, setTimerActive] = useState<boolean>(false)
+
+  const formatSeconds = (s: number) => {
+    const mm = Math.floor(s / 60)
+    const ss = s % 60
+    return `${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`
+  }
+
+  const startOneMinuteTimer = () => {
+    setTimerSeconds(60)
+    setTimerActive(true)
+  }
+  const stopTimer = () => {
+    setTimerActive(false)
+    setTimerSeconds(0)
+  }
+
+  useEffect(() => {
+    if (!timerActive) return
+    const id = setInterval(() => {
+      setTimerSeconds(prev => {
+        if (prev <= 1) {
+          clearInterval(id)
+          setTimerActive(false)
+          // Vibração ao finalizar (sem som)
+          try {
+            if ('vibrate' in navigator) {
+              navigator.vibrate([200, 100, 200])
+            }
+          } catch (_) {}
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+    return () => clearInterval(id)
+  }, [timerActive])
 
   // Estado para carga e anotação por exercício
   const [exerciseNotes, setExerciseNotes] = useState<Record<string, { load: string; note: string }>>({})
@@ -545,6 +585,15 @@ const WorkoutTracker: React.FC = () => {
                 <Clock size={16} />
               )}
               <span className="text-sm">{workouts[currentWorkout].cardio}</span>
+              {/* Timer 1 min */}
+              <div className="ml-auto flex items-center gap-2">
+                <span className="text-xs bg-white/20 px-2 py-1 rounded">{formatSeconds(timerSeconds)}</span>
+                {!timerActive ? (
+                  <button onClick={startOneMinuteTimer} className="text-xs bg-white text-blue-700 font-bold px-2 py-1 rounded hover:bg-blue-50 border border-white/60">Iniciar 1:00</button>
+                ) : (
+                  <button onClick={stopTimer} className="text-xs bg-white text-red-700 font-bold px-2 py-1 rounded hover:bg-red-50 border border-white/60">Parar</button>
+                )}
+              </div>
             </div>
           </div>
 
@@ -653,7 +702,6 @@ const WorkoutTracker: React.FC = () => {
               const days = generateDaysForRange(start, end)
               const todayISO = toISODate(startOfDay(new Date()))
               const isPast = (iso: string) => iso < todayISO
-              const isTodayOrFuture = (iso: string) => iso >= todayISO
               const cellClass = (iso: string) => {
                 if (calendarCompletions.has(iso)) return 'bg-green-100 text-green-700 border-green-300'
                 if (isPast(iso)) return 'bg-red-100 text-red-700 border-red-300'
