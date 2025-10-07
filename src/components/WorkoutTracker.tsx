@@ -304,12 +304,18 @@ const WorkoutTracker: React.FC = () => {
         <div className="bg-white rounded-lg shadow-md p-6 mb-4">
           <div className="flex items-center gap-3 mb-4">
             <Target className="text-blue-600" size={28} />
-            <div>
+            <div className="flex-1">
               <h1 className="text-xl font-bold text-gray-800">Workout Tracker</h1>
               <p className="text-gray-600 text-sm">Não negocie com a mente</p>
             </div>
+            <button
+              onClick={async () => { await supabase.auth.signOut(); }}
+              className="text-xs text-blue-600 hover:text-blue-700"
+            >
+              Sair
+            </button>
           </div>
-
+          
           {/* Seleção de treino */}
           <div className="flex gap-2 mb-4">
             {(Object.keys(workouts) as WorkoutKey[]).map(key => (
