@@ -41,76 +41,76 @@ const workouts: Record<WorkoutKey, Workout> = {
     ],
   },
   B: {
-    name: 'TREINO B - PEITO, OMBROS E TRÍCEPS',
+    name: 'TREINO B - PERNAS "LEG SWEEP"',
     day: 'Terça-feira',
     color: 'bg-red-600',
-    cardio: 'Esteira 10 min',
+    cardio: 'Bicicleta 10 min',
     exercises: [
-      { id: 'b1', name: 'Supino Inclinado com Halter', reps: '10', sets: '4x', type: 'N' },
-      { id: 'b2', name: 'Crucifixo na Máquina', reps: '8 + 8', sets: '3x', type: 'DS' },
-      { id: 'b3', name: 'Chest Press Hammer', reps: '10', sets: '3x', type: 'N' },
-      { id: 'b4', name: 'Desenvolvimento Arnold', reps: '8-10', sets: '4x', type: 'N' },
-      { id: 'b5', name: 'Elevação Lateral 21s', reps: '7+7+7', sets: '3x', type: 'SP' },
-      { id: 'b6', name: 'Crucifixo Inverso na Máquina', reps: '12-15', sets: '4x', type: 'N' },
-      { id: 'b7', name: 'Elevação Frontal na Polia', reps: '10', sets: '3x', type: 'N' },
-      { id: 'b8', name: 'Tríceps Francês Unilateral', reps: '12', sets: '3x', type: 'N' },
-      { id: 'b9', name: 'Tríceps Corda na Polia', reps: '10 + 10', sets: '3x', type: 'DS' },
-      { id: 'b10', name: 'Abdominal Supra Declinado com Carga', reps: '12', sets: '4x', type: 'N' },
-      { id: 'b11', name: 'Esteira', reps: '10 min', sets: '1x', type: 'CARDIO' },
+      { id: 'b1', name: 'Agachamento Sumo', reps: '10', sets: '4x', type: 'N' },
+      { id: 'b2', name: 'Leg Press (Pés Altos/Afastados)', reps: '12', sets: '4x', type: 'N' },
+      { id: 'b3', name: 'Agachamento Búlgaro', reps: '10-12', sets: '3x', type: 'N' },
+      { id: 'b4', name: 'Mesa Flexora', reps: '8 + 8', sets: '3x', type: 'DS' },
+      { id: 'b5', name: 'Cadeira Extensora (Rotação Externa)', reps: '8 + 8', sets: '3x', type: 'DS' },
+      { id: 'b6', name: 'Elevação Pélvica', reps: '15', sets: '4x', type: 'N' },
+      { id: 'b7', name: 'Panturrilha em Pé (Rotação Interna)', reps: '15', sets: '4x', type: 'N' },
+      { id: 'b8', name: 'Abdução na Máquina', reps: '15', sets: '3x', type: 'N' },
+      { id: 'b9', name: 'Adução na Máquina', reps: '15', sets: '3x', type: 'N' },
+      { id: 'b10', name: 'Abdominal Infra Banco Declinado', reps: '15', sets: '3x', type: 'N' },
+      { id: 'b11', name: 'Bicicleta', reps: '10 min', sets: '1x', type: 'CARDIO' },
     ],
   },
   C: {
-    name: 'TREINO C - PERNAS "LEG SWEEP"',
+    name: 'TREINO C - PEITO, OMBROS E TRÍCEPS',
     day: 'Quarta-feira',
     color: 'bg-green-600',
-    cardio: 'Bicicleta 10 min',
+    cardio: 'Esteira 10 min',
     exercises: [
-      { id: 'c1', name: 'Agachamento Sumo', reps: '10', sets: '4x', type: 'N' },
-      { id: 'c2', name: 'Leg Press (Pés Altos/Afastados)', reps: '12', sets: '4x', type: 'N' },
-      { id: 'c3', name: 'Agachamento Búlgaro', reps: '10-12', sets: '3x', type: 'N' },
-      { id: 'c4', name: 'Mesa Flexora', reps: '8 + 8', sets: '3x', type: 'DS' },
-      { id: 'c5', name: 'Cadeira Extensora (Rotação Externa)', reps: '8 + 8', sets: '3x', type: 'DS' },
-      { id: 'c6', name: 'Elevação Pélvica', reps: '15', sets: '4x', type: 'N' },
-      { id: 'c7', name: 'Panturrilha em Pé (Rotação Interna)', reps: '15', sets: '4x', type: 'N' },
-      { id: 'c8', name: 'Abdução na Máquina', reps: '15', sets: '3x', type: 'N' },
-      { id: 'c9', name: 'Adução na Máquina', reps: '15', sets: '3x', type: 'N' },
-      { id: 'c10', name: 'Abdominal Infra Banco Declinado', reps: '15', sets: '3x', type: 'N' },
-      { id: 'c11', name: 'Bicicleta', reps: '10 min', sets: '1x', type: 'CARDIO' },
+      { id: 'c1', name: 'Supino Inclinado com Halter', reps: '10', sets: '4x', type: 'N' },
+      { id: 'c2', name: 'Crucifixo na Máquina', reps: '8 + 8', sets: '3x', type: 'DS' },
+      { id: 'c3', name: 'Chest Press Hammer', reps: '10', sets: '3x', type: 'N' },
+      { id: 'c4', name: 'Desenvolvimento Arnold', reps: '8-10', sets: '4x', type: 'N' },
+      { id: 'c5', name: 'Elevação Lateral 21s', reps: '7+7+7', sets: '3x', type: 'SP' },
+      { id: 'c6', name: 'Crucifixo Inverso na Máquina', reps: '12-15', sets: '4x', type: 'N' },
+      { id: 'c7', name: 'Elevação Frontal na Polia', reps: '10', sets: '3x', type: 'N' },
+      { id: 'c8', name: 'Tríceps Francês Unilateral', reps: '12', sets: '3x', type: 'N' },
+      { id: 'c9', name: 'Tríceps Corda na Polia', reps: '10 + 10', sets: '3x', type: 'DS' },
+      { id: 'c10', name: 'Abdominal Supra Declinado com Carga', reps: '12', sets: '4x', type: 'N' },
+      { id: 'c11', name: 'Esteira', reps: '10 min', sets: '1x', type: 'CARDIO' },
     ],
   },
   D: {
-    name: 'TREINO D - OMBROS ESPECIALIZADOS',
+    name: 'TREINO D - PERNAS VOLUME/BOMBA',
     day: 'Sexta-feira',
     color: 'bg-purple-600',
-    cardio: 'Esteira 10 min',
+    cardio: 'Bicicleta 10 min',
     exercises: [
-      { id: 'd1', name: 'Desenvolvimento com Barra pela Frente', reps: '8-10', sets: '4x', type: 'N' },
-      { id: 'd2', name: 'Elevação Lateral com Cabo', reps: '12', sets: '4x', type: 'N' },
-      { id: 'd3', name: 'Remada Alta', reps: '10', sets: '3x', type: 'N' },
-      { id: 'd4', name: 'Elevação Lateral Inclinada', reps: '12', sets: '3x', type: 'N' },
-      { id: 'd5', name: 'Elevação Posterior com Halteres', reps: '12', sets: '3x', type: 'N' },
-      { id: 'd6', name: 'Elevação Posterior no Cabo', reps: '12', sets: '3x', type: 'N' },
-      { id: 'd7', name: 'Abdominal Supra Declinado com Carga', reps: '15', sets: '3x', type: 'N' },
-      { id: 'd8', name: 'Esteira', reps: '10 min', sets: '1x', type: 'CARDIO' },
+      { id: 'd1', name: 'Agachamento no Smith', reps: '15', sets: '4x', type: 'N' },
+      { id: 'd2', name: 'Cadeira Extensora', reps: '15-20', sets: '4x', type: 'N' },
+      { id: 'd3', name: 'Leg Press (Pés Juntos)', reps: '20', sets: '3x', type: 'N' },
+      { id: 'd4', name: 'Stiff com Halteres', reps: '12', sets: '4x', type: 'N' },
+      { id: 'd5', name: 'Mesa Flexora', reps: '15', sets: '3x', type: 'N' },
+      { id: 'd6', name: 'Afundo Búlgaro', reps: '12', sets: '3x', type: 'N' },
+      { id: 'd7', name: 'Panturrilha Sentado', reps: '20', sets: '4x', type: 'N' },
+      { id: 'd8', name: 'Abdução na Máquina', reps: '15', sets: '3x', type: 'N' },
+      { id: 'd9', name: 'Adução na Máquina', reps: '15', sets: '3x', type: 'N' },
+      { id: 'd10', name: 'Abdominal Oblíquo (Bicicleta)', reps: '15 cada lado', sets: '3x', type: 'N' },
+      { id: 'd11', name: 'Bicicleta', reps: '10 min', sets: '1x', type: 'CARDIO' },
     ],
   },
   E: {
-    name: 'TREINO E - PERNAS VOLUME/BOMBA',
+    name: 'TREINO E - OMBROS ESPECIALIZADOS',
     day: 'Sábado',
     color: 'bg-orange-600',
-    cardio: 'Bicicleta 10 min',
+    cardio: 'Esteira 10 min',
     exercises: [
-      { id: 'e1', name: 'Agachamento no Smith', reps: '15', sets: '4x', type: 'N' },
-      { id: 'e2', name: 'Cadeira Extensora', reps: '15-20', sets: '4x', type: 'N' },
-      { id: 'e3', name: 'Leg Press (Pés Juntos)', reps: '20', sets: '3x', type: 'N' },
-      { id: 'e4', name: 'Stiff com Halteres', reps: '12', sets: '4x', type: 'N' },
-      { id: 'e5', name: 'Mesa Flexora', reps: '15', sets: '3x', type: 'N' },
-      { id: 'e6', name: 'Afundo Búlgaro', reps: '12', sets: '3x', type: 'N' },
-      { id: 'e7', name: 'Panturrilha Sentado', reps: '20', sets: '4x', type: 'N' },
-      { id: 'e8', name: 'Abdução na Máquina', reps: '15', sets: '3x', type: 'N' },
-      { id: 'e9', name: 'Adução na Máquina', reps: '15', sets: '3x', type: 'N' },
-      { id: 'e10', name: 'Abdominal Oblíquo (Bicicleta)', reps: '15 cada lado', sets: '3x', type: 'N' },
-      { id: 'e11', name: 'Bicicleta', reps: '10 min', sets: '1x', type: 'CARDIO' },
+      { id: 'e1', name: 'Desenvolvimento com Barra pela Frente', reps: '8-10', sets: '4x', type: 'N' },
+      { id: 'e2', name: 'Elevação Lateral com Cabo', reps: '12', sets: '4x', type: 'N' },
+      { id: 'e3', name: 'Remada Alta', reps: '10', sets: '3x', type: 'N' },
+      { id: 'e4', name: 'Elevação Lateral Inclinada', reps: '12', sets: '3x', type: 'N' },
+      { id: 'e5', name: 'Elevação Posterior com Halteres', reps: '12', sets: '3x', type: 'N' },
+      { id: 'e6', name: 'Elevação Posterior no Cabo', reps: '12', sets: '3x', type: 'N' },
+      { id: 'e7', name: 'Abdominal Supra Declinado com Carga', reps: '15', sets: '3x', type: 'N' },
+      { id: 'e8', name: 'Esteira', reps: '10 min', sets: '1x', type: 'CARDIO' },
     ],
   },
 }
@@ -787,11 +787,11 @@ const WorkoutTracker: React.FC = () => {
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-red-600"></div>
-              <span className="text-sm text-gray-700">Terça - Peito/Ombros/Tríceps</span>
+              <span className="text-sm text-gray-700">Terça - Pernas (Leg Sweep)</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-green-600"></div>
-              <span className="text-sm text-gray-700">Quarta - Pernas (Pesado)</span>
+              <span className="text-sm text-gray-700">Quarta - Peito/Ombros/Tríceps</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-gray-400"></div>
@@ -799,11 +799,11 @@ const WorkoutTracker: React.FC = () => {
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-purple-600"></div>
-              <span className="text-sm text-gray-700">Sexta - Ombros Especializados</span>
+              <span className="text-sm text-gray-700">Sexta - Pernas (Volume/Bomba)</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-orange-600"></div>
-              <span className="text-sm text-gray-700">Sábado - Pernas (Volume/Bomba)</span>
+              <span className="text-sm text-gray-700">Sábado - Ombros Especializados</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-gray-400"></div>
