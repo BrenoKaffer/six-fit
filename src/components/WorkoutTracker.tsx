@@ -124,6 +124,7 @@ const WorkoutTracker: React.FC = () => {
   const [calendarFilter, setCalendarFilter] = useState<'week' | 'month' | 'year'>('month')
   const [anchorDate] = useState<Date>(new Date())
   const [calendarCompletions, setCalendarCompletions] = useState<Set<string>>(new Set())
+  const [calendarMisses, setCalendarMisses] = useState<Set<string>>(new Set())
 
   // Timer 1 min (sem som, com vibração)
   const [timerSeconds, setTimerSeconds] = useState<number>(0)
@@ -223,6 +224,12 @@ const WorkoutTracker: React.FC = () => {
       } catch (_) {}
     }
     hydrate()
+    try {
+      const savedComp = localStorage.getItem('calendarCompletions')
+      const savedMiss = localStorage.getItem('calendarMisses')
+      if (savedComp) setCalendarCompletions(new Set(JSON.parse(savedComp)))
+      if (savedMiss) setCalendarMisses(new Set(JSON.parse(savedMiss)))
+    } catch (_) {}
   }, [])
 
   // Helpers de calendário
@@ -282,6 +289,37 @@ const WorkoutTracker: React.FC = () => {
     return days
   }
 
+  const toggleCalendarDay = (iso: string) => {
+    setCalendarCompletions(prev => {
+      const newComp = new Set(prev)
+      const inComp = newComp.has(iso)
+      if (inComp) {
+        // Se está completo, alterna para vermelho (miss)
+        newComp.delete(iso)
+        setCalendarMisses(mPrev => {
+          const ns = new Set(mPrev)
+          ns.add(iso)
+          return ns
+        })
+      } else {
+        // Se não está completo, verificar se está em misses
+        setCalendarMisses(mPrev => {
+          const ns = new Set(mPrev)
+          if (ns.has(iso)) {
+            // Se estava vermelho, limpa (volta para cinza)
+            ns.delete(iso)
+            return ns
+          } else {
+            // Marca como concluído (verde)
+            newComp.add(iso)
+            return ns
+          }
+        })
+      }
+      return newComp
+    })
+  }
+
   // Carregar conclusões no intervalo do filtro
   useEffect(() => {
     const loadCompletions = async () => {
@@ -337,6 +375,12 @@ const WorkoutTracker: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('exerciseNotes', JSON.stringify(exerciseNotes))
   }, [exerciseNotes])
+  useEffect(() => {
+    localStorage.setItem('calendarCompletions', JSON.stringify(Array.from(calendarCompletions)))
+  }, [calendarCompletions])
+  useEffect(() => {
+    localStorage.setItem('calendarMisses', JSON.stringify(Array.from(calendarMisses)))
+  }, [calendarMisses])
   const toggleExercise = (workoutId: WorkoutKey, exerciseId: string) => {
     const key = `${workoutId}-${exerciseId}`
     setCompletedExercises(prev => ({
@@ -700,11 +744,9 @@ const WorkoutTracker: React.FC = () => {
             {(() => {
               const { start, end } = getRangeForFilter(anchorDate, calendarFilter)
               const days = generateDaysForRange(start, end)
-              const todayISO = toISODate(startOfDay(new Date()))
-              const isPast = (iso: string) => iso < todayISO
               const cellClass = (iso: string) => {
                 if (calendarCompletions.has(iso)) return 'bg-green-100 text-green-700 border-green-300'
-                if (isPast(iso)) return 'bg-red-100 text-red-700 border-red-300'
+                if (calendarMisses.has(iso)) return 'bg-red-100 text-red-700 border-red-300'
                 return 'bg-gray-100 text-gray-700 border-gray-300'
               }
 
@@ -730,7 +772,7 @@ const WorkoutTracker: React.FC = () => {
                             {mdays.map((d, i) => {
                               const iso = toISODate(d)
                               return (
-                                <div key={i} className={`border rounded p-1 text-center text-xs ${cellClass(iso)}`}>{d.getDate()}</div>
+                                <div key={i} className={`border rounded p-1 text-center text-xs cursor-pointer hover:opacity-80 ${cellClass(iso)}`} onClick={() => toggleCalendarDay(iso)}>{d.getDate()}</div>
                               )
                             })}
                           </div>
@@ -760,7 +802,7 @@ const WorkoutTracker: React.FC = () => {
                     {days.map((d, i) => {
                       const iso = toISODate(d)
                       return (
-                        <div key={i} className={`border rounded p-2 text-center text-xs ${cellClass(iso)}`}>{d.getDate()}</div>
+                        <div key={i} className={`border rounded p-2 text-center text-xs cursor-pointer hover:opacity-80 ${cellClass(iso)}`} onClick={() => toggleCalendarDay(iso)}>{d.getDate()}</div>
                       )
                     })}
                   </div>
