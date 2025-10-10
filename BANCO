@@ -1,127 +1,482 @@
 -- WARNING: This schema is for context only and is not meant to be run.
 -- Table order and constraints may not be valid for execution.
 
-CREATE TABLE public.exercise_entries (
+CREATE TABLE public.ab_test_metrics (
+  id integer NOT NULL DEFAULT nextval('ab_test_metrics_id_seq'::regclass),
+  test_name character varying NOT NULL,
+  configuration_name character varying NOT NULL,
+  table_id character varying,
+  strategy_name character varying,
+  total_signals integer DEFAULT 0,
+  successful_signals integer DEFAULT 0,
+  total_profit numeric DEFAULT 0.0,
+  win_rate double precision DEFAULT 0.0,
+  avg_confidence double precision DEFAULT 0.0,
+  test_start_time timestamp with time zone,
+  test_end_time timestamp with time zone,
+  timestamp_recorded timestamp with time zone DEFAULT now(),
+  is_active boolean DEFAULT true,
+  metadata jsonb,
+  CONSTRAINT ab_test_metrics_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.alert_thresholds (
+  id integer NOT NULL DEFAULT nextval('alert_thresholds_id_seq'::regclass),
+  metric_name character varying NOT NULL UNIQUE,
+  threshold_type character varying NOT NULL CHECK (threshold_type::text = ANY (ARRAY['min'::character varying, 'max'::character varying]::text[])),
+  min_value numeric,
+  max_value numeric,
+  warning_threshold numeric,
+  critical_threshold numeric,
+  description text,
+  notification_channels jsonb DEFAULT '[]'::jsonb,
+  enabled boolean DEFAULT true,
+  cooldown_minutes integer DEFAULT 30,
+  created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT alert_thresholds_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.audit_logs (
   id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  timestamp timestamp with time zone NOT NULL DEFAULT timezone('utc'::text, now()),
+  action text NOT NULL,
+  details jsonb NOT NULL DEFAULT '{}'::jsonb,
   user_id uuid,
-  workout_id text NOT NULL CHECK (workout_id = ANY (ARRAY['A'::text, 'B'::text, 'C'::text, 'D'::text, 'E'::text])),
-  exercise_id text NOT NULL,
-  date date NOT NULL DEFAULT CURRENT_DATE,
-  load text,
-  note text,
+  CONSTRAINT audit_logs_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.automated_alerts (
+  id integer NOT NULL DEFAULT nextval('automated_alerts_id_seq'::regclass),
+  alert_type character varying NOT NULL,
+  metric_name character varying NOT NULL,
+  current_value numeric,
+  threshold_value numeric,
+  severity character varying CHECK (severity::text = ANY (ARRAY['warning'::character varying, 'critical'::character varying, 'info'::character varying]::text[])),
+  message text,
+  metadata jsonb,
+  resolved boolean DEFAULT false,
+  resolved_at timestamp with time zone,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT automated_alerts_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.backup_profiles (
+  id uuid,
+  email text,
+  full_name text,
+  avatar_url text,
+  created_at timestamp with time zone,
+  updated_at timestamp with time zone
+);
+CREATE TABLE public.backup_user_preferences (
+  id uuid,
+  theme text,
+  notifications boolean,
+  language text,
+  created_at timestamp with time zone,
+  updated_at timestamp with time zone
+);
+CREATE TABLE public.backup_user_profiles (
+  user_id uuid,
+  preferences jsonb,
+  notes jsonb,
+  account_status text,
+  permissions jsonb,
+  created_at timestamp with time zone,
+  updated_at timestamp with time zone,
+  email text,
+  full_name text,
+  cpf text,
+  phone text,
+  birth_date date,
+  avatar_url text,
+  email_verified boolean,
+  terms_accepted boolean,
+  profile_completed boolean,
+  onboarding_completed boolean,
+  registration_source text
+);
+CREATE TABLE public.coupon_usages (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  coupon_id uuid NOT NULL,
+  user_id uuid NOT NULL,
+  transaction_id uuid,
+  subscription_id uuid,
+  discount_amount integer NOT NULL,
+  original_amount integer NOT NULL,
+  final_amount integer NOT NULL,
+  used_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT coupon_usages_pkey PRIMARY KEY (id),
+  CONSTRAINT coupon_usages_coupon_id_fkey FOREIGN KEY (coupon_id) REFERENCES public.coupons(id),
+  CONSTRAINT coupon_usages_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id),
+  CONSTRAINT coupon_usages_transaction_id_fkey FOREIGN KEY (transaction_id) REFERENCES public.transactions(id),
+  CONSTRAINT coupon_usages_subscription_id_fkey FOREIGN KEY (subscription_id) REFERENCES public.subscriptions(id)
+);
+CREATE TABLE public.coupons (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  code text NOT NULL UNIQUE,
+  description text,
+  discount_type text NOT NULL CHECK (discount_type = ANY (ARRAY['percentage'::text, 'fixed'::text])),
+  discount_value integer NOT NULL CHECK (discount_value > 0),
+  max_uses integer,
+  current_uses integer DEFAULT 0,
+  max_uses_per_user integer DEFAULT 1,
+  is_active boolean DEFAULT true,
+  starts_at timestamp with time zone DEFAULT now(),
+  expires_at timestamp with time zone,
+  minimum_amount integer,
+  applicable_plans ARRAY DEFAULT ARRAY['Professional'::text],
+  created_by text,
+  metadata jsonb DEFAULT '{}'::jsonb,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   updated_at timestamp with time zone NOT NULL DEFAULT now(),
-  CONSTRAINT exercise_entries_pkey PRIMARY KEY (id),
-  CONSTRAINT exercise_entries_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
+  CONSTRAINT coupons_pkey PRIMARY KEY (id)
 );
-CREATE TABLE public.workout_completions (
+CREATE TABLE public.generated_signals (
   id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
-  user_id uuid,
-  workout_id text NOT NULL CHECK (workout_id = ANY (ARRAY['A'::text, 'B'::text, 'C'::text, 'D'::text, 'E'::text])),
-  date date NOT NULL DEFAULT CURRENT_DATE,
+  timestamp_generated timestamp with time zone NOT NULL DEFAULT timezone('utc'::text, now()),
+  table_id text NOT NULL,
+  strategy_name text,
+  suggested_bets jsonb,
+  suggested_units integer,
+  confidence_level text,
+  message text,
+  is_validated boolean DEFAULT false,
+  type text,
+  expires_at timestamp with time zone,
+  confidence_score integer DEFAULT 50,
+  confidence_factors jsonb DEFAULT '{}'::jsonb,
+  bet_amount integer DEFAULT 1,
+  ml_targets jsonb DEFAULT '[]'::jsonb,
+  CONSTRAINT generated_signals_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.hot_cold_tracking (
+  id integer NOT NULL DEFAULT nextval('hot_cold_tracking_id_seq'::regclass),
+  table_id character varying NOT NULL,
+  number_value integer NOT NULL CHECK (number_value >= 0 AND number_value <= 36),
+  frequency_count integer DEFAULT 0,
+  hotness_score double precision DEFAULT 0.0,
+  coldness_score double precision DEFAULT 0.0,
+  last_seen timestamp with time zone,
+  analysis_window_hours integer DEFAULT 24,
+  timestamp_calculated timestamp with time zone DEFAULT now(),
+  metadata jsonb,
+  CONSTRAINT hot_cold_tracking_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.kpi_strategy_performance_summary (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  summary_date date NOT NULL,
+  strategy_name text NOT NULL,
+  total_activations integer NOT NULL DEFAULT 0,
+  total_hits integer NOT NULL DEFAULT 0,
+  total_misses integer NOT NULL DEFAULT 0,
+  hit_rate real NOT NULL DEFAULT 0.0,
+  total_net_payout real NOT NULL DEFAULT 0.0,
+  average_payout_per_activation real NOT NULL DEFAULT 0.0,
+  last_updated timestamp with time zone NOT NULL DEFAULT timezone('utc'::text, now()),
+  CONSTRAINT kpi_strategy_performance_summary_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.ml_features_cache (
+  id integer NOT NULL DEFAULT nextval('ml_features_cache_id_seq'::regclass),
+  table_id character varying NOT NULL,
+  feature_set_name character varying NOT NULL,
+  features_data jsonb NOT NULL,
+  timestamp_generated timestamp with time zone DEFAULT now(),
+  expires_at timestamp with time zone,
+  version character varying DEFAULT '1.0'::character varying,
+  metadata jsonb,
+  CONSTRAINT ml_features_cache_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.ml_feedback (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  timestamp timestamp with time zone NOT NULL DEFAULT timezone('utc'::text, now()),
+  model_name text NOT NULL,
+  feedback_data jsonb NOT NULL DEFAULT '{}'::jsonb,
+  accuracy_score real,
+  table_id text DEFAULT 'default'::text,
+  bet_type text DEFAULT 'unknown'::text,
+  confidence real,
+  units real,
+  result text,
+  source text DEFAULT 'system'::text,
+  model_version text DEFAULT '1.0.0'::text,
+  prediction_data jsonb,
+  actual_number integer,
+  actual_color text,
+  profit_loss real DEFAULT 0.0,
+  prediction_id text,
+  CONSTRAINT ml_feedback_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.ml_model_performance (
+  id integer NOT NULL DEFAULT nextval('ml_model_performance_id_seq'::regclass),
+  model_version character varying NOT NULL,
+  model_name character varying,
+  accuracy double precision NOT NULL,
+  precision_score double precision NOT NULL,
+  recall_score double precision NOT NULL,
+  f1_score double precision NOT NULL,
+  sample_count integer NOT NULL,
+  timestamp timestamp with time zone DEFAULT now(),
+  performance_window_hours integer DEFAULT 24,
+  metadata jsonb,
+  target_type character varying,
+  CONSTRAINT ml_model_performance_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.ml_predictions_log (
+  id integer NOT NULL DEFAULT nextval('ml_predictions_log_id_seq'::regclass),
+  table_id character varying NOT NULL,
+  prediction_id character varying NOT NULL UNIQUE,
+  model_version character varying,
+  target_type character varying,
+  predicted_value character varying,
+  confidence_score double precision,
+  actual_value character varying,
+  was_successful boolean,
+  prediction_timestamp timestamp with time zone DEFAULT now(),
+  result_timestamp timestamp with time zone,
+  latency_ms integer,
+  features_used jsonb,
+  metadata jsonb,
+  CONSTRAINT ml_predictions_log_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.monitoring_logs (
+  id integer NOT NULL DEFAULT nextval('monitoring_logs_id_seq'::regclass),
+  service_name character varying NOT NULL,
+  log_level character varying CHECK (log_level::text = ANY (ARRAY['debug'::character varying, 'info'::character varying, 'warning'::character varying, 'error'::character varying, 'critical'::character varying]::text[])),
+  message text NOT NULL,
+  metadata jsonb,
+  timestamp timestamp with time zone DEFAULT now(),
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT monitoring_logs_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.payment_methods (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  pagarme_card_id text UNIQUE,
+  pagarme_customer_id text,
+  card_brand text NOT NULL,
+  card_last_digits text NOT NULL,
+  card_holder_name text NOT NULL,
+  card_exp_month integer NOT NULL,
+  card_exp_year integer NOT NULL,
+  is_default boolean DEFAULT false,
+  is_active boolean DEFAULT true,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
-  CONSTRAINT workout_completions_pkey PRIMARY KEY (id),
-  CONSTRAINT workout_completions_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT payment_methods_pkey PRIMARY KEY (id),
+  CONSTRAINT payment_methods_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
 );
-
--- VIEW: últimas entradas por exercício e usuário
-CREATE OR REPLACE VIEW public.exercise_entries_latest AS
-WITH ranked AS (
-  SELECT
-    e.*,
-    ROW_NUMBER() OVER (
-      PARTITION BY e.user_id, e.exercise_id
-      ORDER BY e.date DESC, e.created_at DESC
-    ) AS rn
-  FROM public.exercise_entries e
-)
-SELECT
-  id, user_id, workout_id, exercise_id, date, load, note, created_at, updated_at
-FROM ranked
-WHERE rn = 1;
-
--- TABELA: user_profiles (dados centralizados por usuário)
-CREATE TABLE IF NOT EXISTS public.user_profiles (
-  id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  email text,
-  exercise_entries jsonb NOT NULL DEFAULT '[]'::jsonb,
-  workout_completions jsonb NOT NULL DEFAULT '[]'::jsonb,
-  exercise_entries_latest jsonb NOT NULL DEFAULT '[]'::jsonb,
-  updated_at timestamp with time zone NOT NULL DEFAULT now()
+CREATE TABLE public.payment_webhooks (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  webhook_id text,
+  event_type text NOT NULL,
+  object_type text NOT NULL,
+  object_id text NOT NULL,
+  status text NOT NULL DEFAULT 'pending'::text CHECK (status = ANY (ARRAY['pending'::text, 'processed'::text, 'failed'::text])),
+  attempts integer DEFAULT 0,
+  last_attempt_at timestamp with time zone,
+  error_message text,
+  payload jsonb NOT NULL,
+  headers jsonb DEFAULT '{}'::jsonb,
+  received_at timestamp with time zone NOT NULL DEFAULT now(),
+  processed_at timestamp with time zone,
+  CONSTRAINT payment_webhooks_pkey PRIMARY KEY (id)
 );
-
--- FUNÇÃO: atualizar/agregar dados em user_profiles
-CREATE OR REPLACE FUNCTION public.refresh_user_profiles()
-RETURNS void
-LANGUAGE plpgsql
-AS $$
-BEGIN
-  INSERT INTO public.user_profiles (
-    id,
-    email,
-    exercise_entries,
-    workout_completions,
-    exercise_entries_latest,
-    updated_at
-  )
-  SELECT
-    u.id,
-    u.email,
-    COALESCE(
-      (
-        SELECT jsonb_agg(to_jsonb(e) - 'user_id')
-        FROM public.exercise_entries e
-        WHERE e.user_id = u.id
-      ),
-      '[]'::jsonb
-    ),
-    COALESCE(
-      (
-        SELECT jsonb_agg(to_jsonb(w) - 'user_id')
-        FROM public.workout_completions w
-        WHERE w.user_id = u.id
-      ),
-      '[]'::jsonb
-    ),
-    COALESCE(
-      (
-        SELECT jsonb_agg(to_jsonb(el) - 'user_id')
-        FROM public.exercise_entries_latest el
-        WHERE el.user_id = u.id
-      ),
-      '[]'::jsonb
-    ),
-    now()
-  ON CONFLICT (id) DO UPDATE SET
-    email = EXCLUDED.email,
-    exercise_entries = EXCLUDED.exercise_entries,
-    workout_completions = EXCLUDED.workout_completions,
-    exercise_entries_latest = EXCLUDED.exercise_entries_latest,
-    updated_at = now();
-END;
-$$;
-
--- TRIGGER helper (statement-level)
-CREATE OR REPLACE FUNCTION public.refresh_user_profiles_statement()
-RETURNS trigger
-LANGUAGE plpgsql
-AS $$
-BEGIN
-  PERFORM public.refresh_user_profiles();
-  RETURN NULL;
-END;
-$$;
-
--- TRIGGERS: manter user_profiles sincronizado
-DROP TRIGGER IF EXISTS trg_refresh_user_profiles_after_exercise_entries ON public.exercise_entries;
-CREATE TRIGGER trg_refresh_user_profiles_after_exercise_entries
-AFTER INSERT OR UPDATE OR DELETE ON public.exercise_entries
-FOR EACH STATEMENT EXECUTE FUNCTION public.refresh_user_profiles_statement();
-
-DROP TRIGGER IF EXISTS trg_refresh_user_profiles_after_workout_completions ON public.workout_completions;
-CREATE TRIGGER trg_refresh_user_profiles_after_workout_completions
-AFTER INSERT OR UPDATE OR DELETE ON public.workout_completions
-FOR EACH STATEMENT EXECUTE FUNCTION public.refresh_user_profiles_statement();
-
--- POPULAÇÃO INICIAL (opcional)
--- SELECT public.refresh_user_profiles();
+CREATE TABLE public.roulette_spins (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  timestamp timestamp with time zone NOT NULL DEFAULT timezone('utc'::text, now()),
+  table_id text NOT NULL,
+  spin_number integer NOT NULL,
+  color text NOT NULL,
+  is_even boolean NOT NULL,
+  is_high boolean NOT NULL,
+  dozen text NOT NULL,
+  column_type text NOT NULL,
+  terminal integer NOT NULL DEFAULT 0,
+  race_neighbors jsonb NOT NULL DEFAULT '[]'::jsonb,
+  zone_type text NOT NULL,
+  CONSTRAINT roulette_spins_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.strategy_activations (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  signal_id bigint NOT NULL,
+  timestamp_validated timestamp with time zone NOT NULL DEFAULT timezone('utc'::text, now()),
+  table_id text NOT NULL,
+  strategy_name text NOT NULL,
+  suggested_bets jsonb NOT NULL,
+  suggested_units integer NOT NULL,
+  actual_spin_result integer NOT NULL,
+  actual_spin_color text NOT NULL,
+  is_hit boolean NOT NULL,
+  net_payout real NOT NULL,
+  type text,
+  spin_id bigint,
+  CONSTRAINT strategy_activations_pkey PRIMARY KEY (id),
+  CONSTRAINT strategy_activations_signal_id_fkey FOREIGN KEY (signal_id) REFERENCES public.generated_signals(id)
+);
+CREATE TABLE public.strategy_signals (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT timezone('utc'::text, now()),
+  table_id text NOT NULL,
+  strategy_name text NOT NULL,
+  signal_data jsonb NOT NULL DEFAULT '{}'::jsonb,
+  CONSTRAINT strategy_signals_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.subscriptions (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  user_email text NOT NULL,
+  pagarme_subscription_id text NOT NULL UNIQUE,
+  pagarme_plan_id text,
+  pagarme_customer_id text,
+  plan_name text NOT NULL DEFAULT 'Professional'::text,
+  amount integer NOT NULL,
+  interval text NOT NULL DEFAULT 'month'::text,
+  interval_count integer NOT NULL DEFAULT 1,
+  status text NOT NULL CHECK (status = ANY (ARRAY['active'::text, 'canceled'::text, 'past_due'::text, 'unpaid'::text, 'trialing'::text])),
+  current_period_start timestamp with time zone,
+  current_period_end timestamp with time zone,
+  payment_method text NOT NULL,
+  card_brand text,
+  card_last_digits text,
+  coupon_code text,
+  discount_amount integer DEFAULT 0,
+  trial_end timestamp with time zone,
+  canceled_at timestamp with time zone,
+  cancel_reason text,
+  gateway_response jsonb DEFAULT '{}'::jsonb,
+  metadata jsonb DEFAULT '{}'::jsonb,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT subscriptions_pkey PRIMARY KEY (id),
+  CONSTRAINT subscriptions_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.system_alerts (
+  id integer NOT NULL DEFAULT nextval('system_alerts_id_seq'::regclass),
+  alert_type character varying NOT NULL,
+  severity character varying NOT NULL,
+  title character varying NOT NULL,
+  message text,
+  source_component character varying,
+  table_id character varying,
+  is_resolved boolean DEFAULT false,
+  resolved_at timestamp with time zone,
+  resolved_by character varying,
+  timestamp_created timestamp with time zone DEFAULT now(),
+  metadata jsonb,
+  CONSTRAINT system_alerts_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.system_logs (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  level text NOT NULL CHECK (level = ANY (ARRAY['debug'::text, 'info'::text, 'warn'::text, 'error'::text, 'fatal'::text])),
+  message text NOT NULL,
+  context text,
+  source text,
+  user_id uuid,
+  session_id text,
+  ip_address inet,
+  user_agent text,
+  metadata jsonb DEFAULT '{}'::jsonb,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT system_logs_pkey PRIMARY KEY (id),
+  CONSTRAINT system_logs_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.temporal_patterns (
+  id integer NOT NULL DEFAULT nextval('temporal_patterns_id_seq'::regclass),
+  table_id character varying,
+  pattern_type character varying NOT NULL,
+  time_period character varying NOT NULL,
+  dominant_color character varying,
+  color_bias double precision DEFAULT 0.0,
+  number_frequency jsonb,
+  pattern_strength double precision DEFAULT 0.0,
+  sample_size integer DEFAULT 0,
+  confidence_level double precision DEFAULT 0.0,
+  timestamp_analyzed timestamp with time zone DEFAULT now(),
+  analysis_window_days integer DEFAULT 30,
+  metadata jsonb,
+  CONSTRAINT temporal_patterns_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.transactions (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  user_email text NOT NULL,
+  pagarme_transaction_id text UNIQUE,
+  pagarme_subscription_id text,
+  pagarme_customer_id text,
+  amount integer NOT NULL,
+  original_amount integer,
+  currency text DEFAULT 'BRL'::text,
+  status text NOT NULL CHECK (status = ANY (ARRAY['paid'::text, 'pending'::text, 'refused'::text, 'canceled'::text, 'refunded'::text])),
+  payment_method text NOT NULL CHECK (payment_method = ANY (ARRAY['credit_card'::text, 'pix'::text, 'boleto'::text])),
+  card_brand text,
+  card_last_digits text,
+  card_holder_name text,
+  pix_qr_code text,
+  pix_qr_code_url text,
+  pix_expires_at timestamp with time zone,
+  coupon_code text,
+  discount_amount integer DEFAULT 0,
+  discount_type text,
+  gateway_response jsonb DEFAULT '{}'::jsonb,
+  metadata jsonb DEFAULT '{}'::jsonb,
+  paid_at timestamp with time zone,
+  expires_at timestamp with time zone,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT transactions_pkey PRIMARY KEY (id),
+  CONSTRAINT transactions_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.user_preferences (
+  id uuid NOT NULL,
+  theme text DEFAULT 'light'::text CHECK (theme = ANY (ARRAY['light'::text, 'dark'::text, 'system'::text])),
+  notifications boolean DEFAULT true,
+  language text DEFAULT 'pt-BR'::text,
+  timezone text DEFAULT 'America/Sao_Paulo'::text,
+  email_notifications boolean DEFAULT true,
+  push_notifications boolean DEFAULT true,
+  marketing_emails boolean DEFAULT false,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT user_preferences_pkey PRIMARY KEY (id),
+  CONSTRAINT user_preferences_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.user_profiles (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL UNIQUE,
+  email text NOT NULL UNIQUE,
+  full_name text,
+  cpf text UNIQUE,
+  phone text,
+  birth_date date,
+  avatar_url text,
+  email_verified boolean DEFAULT false,
+  terms_accepted boolean DEFAULT false,
+  profile_completed boolean DEFAULT false,
+  onboarding_completed boolean DEFAULT false,
+  registration_source text DEFAULT 'web'::text,
+  preferences jsonb NOT NULL DEFAULT '{"theme": "light", "language": "pt-BR", "notifications": true}'::jsonb,
+  notes jsonb NOT NULL DEFAULT '[]'::jsonb,
+  permissions jsonb NOT NULL DEFAULT '[]'::jsonb,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  bio text,
+  phone_country_code character varying DEFAULT '+55'::character varying,
+  phone_area_code character varying,
+  phone_number character varying,
+  phone_full character varying,
+  account_status USER-DEFINED NOT NULL DEFAULT 'free'::account_status_enum,
+  CONSTRAINT user_profiles_pkey PRIMARY KEY (id),
+  CONSTRAINT user_profiles_new_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.user_status_changes (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  old_status USER-DEFINED,
+  new_status USER-DEFINED NOT NULL,
+  changed_by text,
+  reason text,
+  metadata jsonb DEFAULT '{}'::jsonb,
+  changed_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT user_status_changes_pkey PRIMARY KEY (id),
+  CONSTRAINT user_status_changes_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
+);

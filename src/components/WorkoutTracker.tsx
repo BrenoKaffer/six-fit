@@ -289,35 +289,57 @@ const WorkoutTracker: React.FC = () => {
     return days
   }
 
-  const toggleCalendarDay = (iso: string) => {
-    setCalendarCompletions(prev => {
-      const newComp = new Set(prev)
-      const inComp = newComp.has(iso)
-      if (inComp) {
-        // Se está completo, alterna para vermelho (miss)
-        newComp.delete(iso)
-        setCalendarMisses(mPrev => {
-          const ns = new Set(mPrev)
-          ns.add(iso)
-          return ns
-        })
+  // Persistir marcação de calendário no Supabase
+  const persistCalendarMark = async (iso: string, status: 'completed' | 'missed' | 'none') => {
+    try {
+      if (status === 'none') {
+        // Remover marcação para este dia
+        const q = supabase.from('calendar_marks').delete().eq('date', iso)
+        if (userId) q.eq('user_id', userId)
+        const { error } = await q
+        if (error) console.error('Erro ao remover marcação de calendário:', error.message)
       } else {
-        // Se não está completo, verificar se está em misses
-        setCalendarMisses(mPrev => {
-          const ns = new Set(mPrev)
-          if (ns.has(iso)) {
-            // Se estava vermelho, limpa (volta para cinza)
-            ns.delete(iso)
-            return ns
-          } else {
-            // Marca como concluído (verde)
-            newComp.add(iso)
-            return ns
-          }
-        })
+        const payload: any = { date: iso, status }
+        if (userId) payload.user_id = userId
+        const { error } = await supabase
+          .from('calendar_marks')
+          .upsert(payload, { onConflict: userId ? 'user_id,date' : 'date' })
+        if (error) console.error('Erro ao salvar marcação de calendário:', error.message)
       }
-      return newComp
-    })
+    } catch (e) {
+      console.error('Falha ao comunicar com Supabase (calendar_marks):', e)
+    }
+  }
+
+  const toggleCalendarDay = (iso: string) => {
+    // Determinar próximo estado com base nos conjuntos atuais
+    const inComp = calendarCompletions.has(iso)
+    const inMiss = calendarMisses.has(iso)
+
+    let nextStatus: 'completed' | 'missed' | 'none'
+    const newComp = new Set(calendarCompletions)
+    const newMiss = new Set(calendarMisses)
+
+    if (inComp) {
+      // Verde -> Vermelho
+      newComp.delete(iso)
+      newMiss.add(iso)
+      nextStatus = 'missed'
+    } else if (inMiss) {
+      // Vermelho -> Cinza
+      newMiss.delete(iso)
+      nextStatus = 'none'
+    } else {
+      // Cinza -> Verde
+      newComp.add(iso)
+      nextStatus = 'completed'
+    }
+
+    setCalendarCompletions(newComp)
+    setCalendarMisses(newMiss)
+
+    // Persistir no banco
+    persistCalendarMark(iso, nextStatus)
   }
 
   // Carregar conclusões no intervalo do filtro
@@ -326,38 +348,68 @@ const WorkoutTracker: React.FC = () => {
       const { start, end } = getRangeForFilter(anchorDate, calendarFilter)
       const startISO = toISODate(start)
       const endISO = toISODate(end)
+      const compSet = new Set<string>()
+      const missSet = new Set<string>()
+
+      // 1) Carregar conclusões de treinos (workout_completions)
       if (userId) {
         try {
-          const { data, error } = await supabase
+          const { data: wc, error: wcErr } = await supabase
             .from('workout_completions')
             .select('date')
             .eq('user_id', userId)
             .gte('date', startISO)
             .lte('date', endISO)
-          if (!error && data) {
-            const s = new Set<string>()
-            data.forEach((row: any) => {
+          if (!wcErr && wc) {
+            wc.forEach((row: any) => {
               const iso = toISODate(new Date(row.date))
-              s.add(iso)
+              compSet.add(iso)
             })
-            setCalendarCompletions(s)
           }
-        } catch (e) {
-          const s = new Set<string>()
+        } catch (_) {
+          // fallback local
           workoutHistory.forEach(h => {
             const iso = parsePtBrToISO(h.date)
-            if (iso) s.add(iso)
+            if (iso) compSet.add(iso)
           })
-          setCalendarCompletions(s)
         }
       } else {
-        const s = new Set<string>()
         workoutHistory.forEach(h => {
           const iso = parsePtBrToISO(h.date)
-          if (iso) s.add(iso)
+          if (iso) compSet.add(iso)
         })
-        setCalendarCompletions(s)
       }
+
+      // 2) Carregar marcações do calendário (calendar_marks)
+      try {
+        let q = supabase
+          .from('calendar_marks')
+          .select('date, status')
+          .gte('date', startISO)
+          .lte('date', endISO)
+        if (userId) q = q.eq('user_id', userId)
+        const { data: cm, error: cmErr } = await q
+        if (!cmErr && cm) {
+          cm.forEach((row: any) => {
+            const iso = toISODate(new Date(row.date))
+            if (row.status === 'missed') {
+              missSet.add(iso)
+              // Remover de completos se estava lá
+              compSet.delete(iso)
+            } else if (row.status === 'completed') {
+              compSet.add(iso)
+              // Garantir que não esteja em misses
+              missSet.delete(iso)
+            }
+          })
+        }
+      } catch (e) {
+        // Se falhar, mantém apenas os conjuntos anteriores (workoutHistory)
+        console.warn('Não foi possível carregar calendar_marks do Supabase:', e)
+      }
+
+      setCalendarCompletions(compSet)
+      setCalendarMisses(missSet)
     }
     loadCompletions()
   }, [calendarFilter, anchorDate, userId, workoutHistory])
