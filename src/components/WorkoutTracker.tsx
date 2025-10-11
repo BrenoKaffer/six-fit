@@ -66,8 +66,9 @@ const workouts: Record<WorkoutKey, Workout> = {
     cardio: 'Esteira 10 min',
     exercises: [
       { id: 'c1', name: 'Supino Inclinado com Halter', reps: '10', sets: '4x', type: 'N' },
+      { id: 'c3', name: 'Supino Reto com Barra', reps: '6-8', sets: '4x', type: 'N' },
+      { id: 'c12', name: 'Paralelas (Dip) para Peito', reps: '8-12', sets: '3x', type: 'N' },
       { id: 'c2', name: 'Crucifixo na Máquina', reps: '8 + 8', sets: '3x', type: 'DS' },
-      { id: 'c3', name: 'Chest Press Hammer', reps: '10', sets: '3x', type: 'N' },
       { id: 'c4', name: 'Desenvolvimento Arnold', reps: '8-10', sets: '4x', type: 'N' },
       { id: 'c5', name: 'Elevação Lateral 21s', reps: '7+7+7', sets: '3x', type: 'SP' },
       { id: 'c6', name: 'Crucifixo Inverso na Máquina', reps: '12-15', sets: '4x', type: 'N' },
@@ -292,18 +293,22 @@ const WorkoutTracker: React.FC = () => {
   // Persistir marcação de calendário no Supabase
   const persistCalendarMark = async (iso: string, status: 'completed' | 'missed' | 'none') => {
     try {
+      // Se não estiver autenticado, não tenta salvar no Supabase; persiste apenas localmente
+      if (!userId) return
+
       if (status === 'none') {
         // Remover marcação para este dia
-        const q = supabase.from('calendar_marks').delete().eq('date', iso)
-        if (userId) q.eq('user_id', userId)
-        const { error } = await q
-        if (error) console.error('Erro ao remover marcação de calendário:', error.message)
-      } else {
-        const payload: any = { date: iso, status }
-        if (userId) payload.user_id = userId
         const { error } = await supabase
           .from('calendar_marks')
-          .upsert(payload, { onConflict: userId ? 'user_id,date' : 'date' })
+          .delete()
+          .eq('date', iso)
+          .eq('user_id', userId)
+        if (error) console.error('Erro ao remover marcação de calendário:', error.message)
+      } else {
+        const payload: any = { date: iso, status, user_id: userId }
+        const { error } = await supabase
+          .from('calendar_marks')
+          .upsert(payload, { onConflict: 'user_id,date' })
         if (error) console.error('Erro ao salvar marcação de calendário:', error.message)
       }
     } catch (e) {
@@ -362,7 +367,7 @@ const WorkoutTracker: React.FC = () => {
             .lte('date', endISO)
           if (!wcErr && wc) {
             wc.forEach((row: any) => {
-              const iso = toISODate(new Date(row.date))
+              const iso = String(row.date)
               compSet.add(iso)
             })
           }
@@ -391,7 +396,7 @@ const WorkoutTracker: React.FC = () => {
         const { data: cm, error: cmErr } = await q
         if (!cmErr && cm) {
           cm.forEach((row: any) => {
-            const iso = toISODate(new Date(row.date))
+            const iso = String(row.date)
             if (row.status === 'missed') {
               missSet.add(iso)
               // Remover de completos se estava lá
@@ -406,6 +411,25 @@ const WorkoutTracker: React.FC = () => {
       } catch (e) {
         // Se falhar, mantém apenas os conjuntos anteriores (workoutHistory)
         console.warn('Não foi possível carregar calendar_marks do Supabase:', e)
+      }
+
+      // 3) Se não estiver autenticado, mesclar com o que está salvo localmente para manter persistência pós-reload
+      if (!userId) {
+        try {
+          const savedComp = localStorage.getItem('calendarCompletions')
+          const savedMiss = localStorage.getItem('calendarMisses')
+          if (savedComp) {
+            const parsed: string[] = JSON.parse(savedComp)
+            parsed.forEach(iso => compSet.add(iso))
+          }
+          if (savedMiss) {
+            const parsed: string[] = JSON.parse(savedMiss)
+            parsed.forEach(iso => {
+              missSet.add(iso)
+              compSet.delete(iso)
+            })
+          }
+        } catch (_) {}
       }
 
       setCalendarCompletions(compSet)
