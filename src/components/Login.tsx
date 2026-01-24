@@ -25,8 +25,8 @@ const Login: React.FC = () => {
         if (error) throw error
         setMessage('Login realizado com sucesso!')
       }
-    } catch (err: any) {
-      setError(err.message || 'Ocorreu um erro')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Ocorreu um erro')
     } finally {
       setLoading(false)
     }

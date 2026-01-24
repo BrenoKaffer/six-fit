@@ -38,7 +38,7 @@ const workouts: Record<WorkoutKey, Workout> = {
       { id: 'a6', name: 'Banco Scott com Halter', reps: '10', sets: '4x', type: 'N' },
       { id: 'a7', name: 'Rosca Direta Barra W', reps: '10-12', sets: '3x', type: 'N' },
       { id: 'a8', name: 'Rosca Martelo', reps: '10-12', sets: '3x', type: 'N' },
-      { id: 'a9', name: 'Abdominal Infra Banco Declinado', reps: '15', sets: '4x', type: 'N' },
+      { id: 'a9', name: 'Abdominal Supra Banco Declinado', reps: '15', sets: '4x', type: 'N' },
       { id: 'a10', name: 'Esteira', reps: '10 min', sets: '1x', type: 'CARDIO' },
     ],
   },
@@ -67,10 +67,10 @@ const workouts: Record<WorkoutKey, Workout> = {
     color: 'bg-green-600',
     cardio: 'Esteira 10 min',
     exercises: [
-      { id: 'c1', name: 'Supino Inclinado com Halter', reps: '10', sets: '4x', type: 'N' },
+      { id: 'c1', name: 'Supino Declinado com Halter', reps: '8-10', sets: '4x', type: 'N' },
       { id: 'c3', name: 'Supino Reto com Barra', reps: '6-8', sets: '4x', type: 'N' },
       { id: 'c12', name: 'Paralelas (Dip) para Peito', reps: '8-12', sets: '3x', type: 'N' },
-      { id: 'c2', name: 'Crucifixo na Máquina', reps: '8 + 8', sets: '3x', type: 'DS' },
+      { id: 'c2', name: 'Crucifixo Declinado com Halter', reps: '10-12', sets: '3x', type: 'N' },
       { id: 'c4', name: 'Desenvolvimento Arnold', reps: '8-10', sets: '4x', type: 'N' },
       { id: 'c5', name: 'Elevação Lateral 21s', reps: '7+7+7', sets: '3x', type: 'SP' },
       { id: 'c6', name: 'Crucifixo Inverso na Máquina', reps: '12-15', sets: '4x', type: 'N' },
@@ -156,11 +156,7 @@ const WorkoutTracker: React.FC = () => {
           clearInterval(id)
           setTimerActive(false)
           // Vibração ao finalizar (sem som)
-          try {
-            if ('vibrate' in navigator) {
-              navigator.vibrate([200, 100, 200])
-            }
-          } catch (_) {}
+          if (typeof navigator.vibrate === 'function') navigator.vibrate([200, 100, 200])
           return 0
         }
         return prev - 1
@@ -206,7 +202,7 @@ const WorkoutTracker: React.FC = () => {
             .eq('user_id', userId)
           if (!latestErr && latest) {
             const notesMap: Record<string, { load: string; note: string }> = {}
-            latest.forEach((row: any) => {
+            ;(latest as Array<{ workout_id: string; exercise_id: string; load: string | null; note: string | null }>).forEach(row => {
               const key = `${row.workout_id}-${row.exercise_id}`
               notesMap[key] = { load: row.load || '', note: row.note || '' }
             })
@@ -219,12 +215,17 @@ const WorkoutTracker: React.FC = () => {
             .order('date', { ascending: false })
             .limit(10)
           if (!compErr && comp) {
-            setWorkoutHistory(
-              comp.map((h: any) => ({ workout: h.workout_id as WorkoutKey, date: new Date(h.date).toLocaleDateString('pt-BR'), completed: true }))
-            )
+            const compRows = comp as Array<{ workout_id: string; date: string }>
+            setWorkoutHistory(compRows.map(h => ({
+              workout: h.workout_id as WorkoutKey,
+              date: new Date(h.date).toLocaleDateString('pt-BR'),
+              completed: true,
+            })))
           }
         }
-      } catch (_) {}
+      } catch (err) {
+        void err
+      }
     }
     hydrate()
     try {
@@ -232,7 +233,9 @@ const WorkoutTracker: React.FC = () => {
       const savedMiss = localStorage.getItem('calendarMisses')
       if (savedComp) setCalendarCompletions(new Set(JSON.parse(savedComp)))
       if (savedMiss) setCalendarMisses(new Set(JSON.parse(savedMiss)))
-    } catch (_) {}
+    } catch (err) {
+      void err
+    }
   }, [])
 
   // Helpers de calendário
@@ -307,7 +310,7 @@ const WorkoutTracker: React.FC = () => {
           .eq('user_id', userId)
         if (error) console.error('Erro ao remover marcação de calendário:', error.message)
       } else {
-        const payload: any = { date: iso, status, user_id: userId }
+        const payload = { date: iso, status, user_id: userId }
         const { error } = await supabase
           .from('calendar_marks')
           .upsert(payload, { onConflict: 'user_id,date' })
@@ -368,13 +371,13 @@ const WorkoutTracker: React.FC = () => {
             .gte('date', startISO)
             .lte('date', endISO)
           if (!wcErr && wc) {
-            wc.forEach((row: any) => {
+            ;(wc as Array<{ date: string }>).forEach(row => {
               const iso = String(row.date)
               compSet.add(iso)
             })
           }
-        } catch (_) {
-          // fallback local
+        } catch (err) {
+          void err
           workoutHistory.forEach(h => {
             const iso = parsePtBrToISO(h.date)
             if (iso) compSet.add(iso)
@@ -397,7 +400,7 @@ const WorkoutTracker: React.FC = () => {
         if (userId) q = q.eq('user_id', userId)
         const { data: cm, error: cmErr } = await q
         if (!cmErr && cm) {
-          cm.forEach((row: any) => {
+          ;(cm as Array<{ date: string; status: string }>).forEach(row => {
             const iso = String(row.date)
             if (row.status === 'missed') {
               missSet.add(iso)
@@ -431,7 +434,9 @@ const WorkoutTracker: React.FC = () => {
               compSet.delete(iso)
             })
           }
-        } catch (_) {}
+        } catch (err) {
+          void err
+        }
       }
 
       setCalendarCompletions(compSet)
@@ -504,8 +509,8 @@ const WorkoutTracker: React.FC = () => {
           setTempNote(dataBase[0].note || '')
         }
       }
-    } catch (e) {
-      // Mantém valores locais em caso de erro de rede/servidor
+    } catch (err) {
+      void err
     }
 
     setSelected({ workoutId, exercise })
@@ -573,8 +578,9 @@ const WorkoutTracker: React.FC = () => {
       // Persistir conclusão no Supabase (modo sem autenticação)
       try {
         const today = new Date().toISOString().slice(0, 10)
-        const payload: any = { workout_id: currentWorkout, date: today }
-        if (userId) payload.user_id = userId
+        const payload = userId
+          ? { workout_id: currentWorkout, date: today, user_id: userId }
+          : { workout_id: currentWorkout, date: today }
         const { error } = await supabase
           .from('workout_completions')
           .insert(payload)
