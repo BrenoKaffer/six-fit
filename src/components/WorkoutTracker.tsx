@@ -40,7 +40,7 @@ const workouts: Record<WorkoutKey, Workout> = {
       { id: 'ua1', name: 'Supino Reto com Barra', reps: '6-8', sets: '3x', type: 'N', rir: '2' },
       { id: 'ua2', name: 'Puxada Aberta (Pegada Pronada)', reps: '6-10', sets: '3x', type: 'N', rir: '1-2' },
       { id: 'ua3', name: 'Supino Inclinado com Halteres', reps: '8-10', sets: '3x', type: 'N', rir: '1-2' },
-      { id: 'ua4', name: 'Remada Apoiada / Máquina', reps: '8-10', sets: '3x', type: 'N', rir: '1-2' },
+      { id: 'ua4', name: 'Remada Apoiada no Banco (Halteres)', reps: '8-10', sets: '3x', type: 'N', rir: '1-2' },
       { id: 'ua5', name: 'Elevação Lateral', reps: '10-15', sets: '3x', type: 'N', rir: '1-2' },
       { id: 'ua6', name: 'Tríceps na Polia', reps: '10-15', sets: '2x', type: 'N', rir: '1-2' },
       { id: 'ua7', name: 'Rosca Direta', reps: '8-12', sets: '2x', type: 'N', rir: '1-2' },
@@ -52,9 +52,9 @@ const workouts: Record<WorkoutKey, Workout> = {
     color: 'bg-red-600',
     cardio: 'Bicicleta 10 min leve',
     exercises: [
-      { id: 'la1', name: 'Agachamento Livre ou Smith', reps: '6-8', sets: '3x', type: 'N', rir: '2', alternatives: ['Agachamento Smith'] },
+      { id: 'la1', name: 'Agachamento Livre', reps: '6-8', sets: '3x', type: 'N', rir: '2', alternatives: ['Agachamento Smith'] },
       { id: 'la2', name: 'Leg Press', reps: '8-12', sets: '3x', type: 'N', rir: '1-2' },
-      { id: 'la3', name: 'Stiff / Romanian Deadlift', reps: '6-10', sets: '3x', type: 'N', rir: '1-2' },
+      { id: 'la3', name: 'Stiff com Barra', reps: '6-10', sets: '3x', type: 'N', rir: '1-2' },
       { id: 'la4', name: 'Mesa Flexora', reps: '10-15', sets: '3x', type: 'N', rir: '1-2' },
       { id: 'la5', name: 'Cadeira Extensora', reps: '10-15', sets: '2x', type: 'N', rir: '1-2' },
       { id: 'la6', name: 'Panturrilha em Pé', reps: '8-12', sets: '3x', type: 'N', rir: '1-2' },
@@ -67,14 +67,14 @@ const workouts: Record<WorkoutKey, Workout> = {
     color: 'bg-green-600',
     cardio: 'Esteira 10 min leve',
     exercises: [
-      { id: 'ub1', name: 'Remada Baixa / Cavalinho', reps: '6-10', sets: '3x', type: 'N', rir: '1-2' },
-      { id: 'ub2', name: 'Supino Inclinado', reps: '6-10', sets: '3x', type: 'N', rir: '1-2' },
-      { id: 'ub3', name: 'Puxada Neutra / Supinada', reps: '8-12', sets: '3x', type: 'N', rir: '1-2' },
-      { id: 'ub4', name: 'Crucifixo na Máquina ou Cabo', reps: '10-15', sets: '2x', type: 'N', rir: '1-2' },
-      { id: 'ub5', name: 'Desenvolvimento com Halteres ou Máquina', reps: '6-10', sets: '2x', type: 'N', rir: '2' },
+      { id: 'ub1', name: 'Remada Cavalinho', reps: '6-10', sets: '3x', type: 'N', rir: '1-2' },
+      { id: 'ub2', name: 'Supino Inclinado com Barra', reps: '6-10', sets: '3x', type: 'N', rir: '1-2' },
+      { id: 'ub3', name: 'Puxada Triângulo (Neutra)', reps: '8-12', sets: '3x', type: 'N', rir: '1-2' },
+      { id: 'ub4', name: 'Crucifixo na Máquina (Peck Deck)', reps: '10-15', sets: '2x', type: 'N', rir: '1-2' },
+      { id: 'ub5', name: 'Desenvolvimento com Halteres', reps: '6-10', sets: '2x', type: 'N', rir: '2' },
       { id: 'ub6', name: 'Elevação Lateral', reps: '12-20', sets: '3x', type: 'N', rir: '1-2' },
       { id: 'ub7', name: 'Rosca Martelo', reps: '8-12', sets: '2x', type: 'N', rir: '1-2' },
-      { id: 'ub8', name: 'Tríceps Francês / Cabo', reps: '8-12', sets: '2x', type: 'N', rir: '1-2' },
+      { id: 'ub8', name: 'Tríceps Francês na Polia', reps: '8-12', sets: '2x', type: 'N', rir: '1-2' },
     ],
   },
   D: {
@@ -83,12 +83,12 @@ const workouts: Record<WorkoutKey, Workout> = {
     color: 'bg-purple-600',
     cardio: 'Bicicleta 10 min leve',
     exercises: [
-      // Ordem obrigatória: Hack/Smith antes do RDL
-      { id: 'lb1', name: 'Agachamento Hack ou Smith', reps: '8-10', sets: '3x', type: 'N', rir: '1-2', alternatives: ['Agachamento Smith', 'Leg Press'] },
-      { id: 'lb2', name: 'Stiff / Romanian Deadlift', reps: '6-8', sets: '3x', type: 'N', rir: '2' },
+      // Ordem obrigatória: Hack antes do Stiff
+      { id: 'lb1', name: 'Agachamento Hack', reps: '8-10', sets: '3x', type: 'N', rir: '1-2', alternatives: ['Agachamento Smith', 'Leg Press'] },
+      { id: 'lb2', name: 'Stiff com Barra', reps: '6-8', sets: '3x', type: 'N', rir: '2' },
       { id: 'lb3', name: 'Hip Thrust', reps: '8-12', sets: '3x', type: 'N', rir: '1-2' },
       { id: 'lb4', name: 'Mesa Flexora', reps: '10-15', sets: '3x', type: 'N', rir: '1-2' },
-      { id: 'lb5', name: 'Leg Press', reps: '10-15', sets: '2x', type: 'N', rir: '1-2' },
+      { id: 'lb8', name: 'Abdução na Máquina', reps: '12-15', sets: '2-3x', type: 'N', rir: '1-2' },
       { id: 'lb6', name: 'Panturrilha Sentado', reps: '10-15', sets: '3x', type: 'N', rir: '1-2' },
       { id: 'lb7', name: 'Abdominal', reps: '10-15', sets: '2-3x', type: 'N', rir: '1-2' },
     ],
@@ -97,9 +97,9 @@ const workouts: Record<WorkoutKey, Workout> = {
     name: 'TREINO E - CARDIO / RECUPERAÇÃO (OPCIONAL)',
     day: 'Sábado',
     color: 'bg-orange-600',
-    cardio: 'Caminhada / Bicicleta 30–45 min (opcional)',
+    cardio: 'Caminhada na Esteira 30–45 min (opcional)',
     exercises: [
-      { id: 'rc1', name: 'Caminhada / Esteira', reps: '30-45 min', sets: '1x', type: 'CARDIO' },
+      { id: 'rc1', name: 'Caminhada na Esteira', reps: '30-45 min', sets: '1x', type: 'CARDIO' },
       { id: 'rc2', name: 'Mobilidade', reps: '5-10 min', sets: '1x', type: 'N' },
     ],
   },
@@ -129,9 +129,13 @@ const WorkoutTracker: React.FC = () => {
   const [calendarCompletions, setCalendarCompletions] = useState<Set<string>>(new Set())
   const [calendarMisses, setCalendarMisses] = useState<Set<string>>(new Set())
 
-  // Timer 1 min (sem som, com vibração)
+  // Timer de descanso com duração configurável (sem som, com vibração)
+  const [timerDuration, setTimerDuration] = useState<number>(() => readLocal('timerDuration', 60))
   const [timerSeconds, setTimerSeconds] = useState<number>(0)
   const [timerActive, setTimerActive] = useState<boolean>(false)
+  // Horário de término: mantém o tempo correto mesmo com a tela bloqueada/aba em segundo plano
+  const [timerEndAt, setTimerEndAt] = useState<number | null>(null)
+  const [isTimerOpen, setIsTimerOpen] = useState(false)
 
   const formatSeconds = (s: number) => {
     const mm = Math.floor(s / 60)
@@ -139,31 +143,61 @@ const WorkoutTracker: React.FC = () => {
     return `${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`
   }
 
-  const startOneMinuteTimer = () => {
-    setTimerSeconds(60)
+  const startTimer = () => {
+    setTimerSeconds(timerDuration)
+    setTimerEndAt(Date.now() + timerDuration * 1000)
+    setTimerActive(true)
+  }
+  const pauseTimer = () => {
+    setTimerActive(false)
+    setTimerEndAt(null)
+  }
+  const resumeTimer = () => {
+    if (timerSeconds <= 0) return
+    setTimerEndAt(Date.now() + timerSeconds * 1000)
     setTimerActive(true)
   }
   const stopTimer = () => {
     setTimerActive(false)
+    setTimerEndAt(null)
     setTimerSeconds(0)
+  }
+  const changeTimerDuration = (seconds: number) => {
+    const next = Math.min(Math.max(seconds, 5), 60 * 60)
+    setTimerDuration(next)
+    try {
+      localStorage.setItem('timerDuration', JSON.stringify(next))
+    } catch (err) {
+      void err
+    }
   }
 
   useEffect(() => {
-    if (!timerActive) return
-    const id = setInterval(() => {
-      setTimerSeconds(prev => {
-        if (prev <= 1) {
-          clearInterval(id)
-          setTimerActive(false)
-          // Vibração ao finalizar (sem som)
-          if (typeof navigator.vibrate === 'function') navigator.vibrate([200, 100, 200])
-          return 0
-        }
-        return prev - 1
-      })
-    }, 1000)
+    if (!timerActive || timerEndAt === null) return
+    const tick = () => {
+      const remaining = Math.max(0, Math.ceil((timerEndAt - Date.now()) / 1000))
+      setTimerSeconds(remaining)
+      if (remaining === 0) {
+        setTimerActive(false)
+        setTimerEndAt(null)
+        // Vibração ao finalizar (sem som)
+        if (typeof navigator.vibrate === 'function') navigator.vibrate([200, 100, 200])
+      }
+    }
+    tick()
+    const id = setInterval(tick, 250)
     return () => clearInterval(id)
-  }, [timerActive])
+  }, [timerActive, timerEndAt])
+
+  // Mantém a tela acesa enquanto o timer em tela cheia está aberto
+  useEffect(() => {
+    if (!isTimerOpen) return
+    type WakeLock = { release: () => Promise<void> }
+    const wakeLockApi = (navigator as Navigator & { wakeLock?: { request: (type: 'screen') => Promise<WakeLock> } }).wakeLock
+    let lock: WakeLock | null = null
+    wakeLockApi?.request('screen').then(l => { lock = l }).catch(() => {})
+    return () => { lock?.release().catch(() => {}) }
+  }, [isTimerOpen])
 
   // Estado para carga e anotação por exercício
   const [exerciseNotes, setExerciseNotes] = useState<Record<string, { load: string; note: string }>>(() => readLocal('exerciseNotes', {}))
@@ -703,11 +737,11 @@ const WorkoutTracker: React.FC = () => {
                 <Clock size={16} />
               )}
               <span className="text-sm">{workouts[currentWorkout].cardio}</span>
-              {/* Timer 1 min */}
+              {/* Timer de descanso — tocar no tempo abre a tela cheia */}
               <div className="ml-auto flex items-center gap-2">
-                <span className="text-xs bg-white/20 px-2 py-1 rounded">{formatSeconds(timerSeconds)}</span>
+                <button onClick={() => setIsTimerOpen(true)} aria-label="Abrir timer em tela cheia" className="text-xs bg-white/20 px-2 py-1 rounded hover:bg-white/30">{formatSeconds(timerSeconds)}</button>
                 {!timerActive ? (
-                  <button onClick={startOneMinuteTimer} className="text-xs bg-white text-blue-700 font-bold px-2 py-1 rounded hover:bg-blue-50 border border-white/60">Iniciar 1:00</button>
+                  <button onClick={startTimer} className="text-xs bg-white text-blue-700 font-bold px-2 py-1 rounded hover:bg-blue-50 border border-white/60">Iniciar {formatSeconds(timerDuration)}</button>
                 ) : (
                   <button onClick={stopTimer} className="text-xs bg-white text-red-700 font-bold px-2 py-1 rounded hover:bg-red-50 border border-white/60">Parar</button>
                 )}
@@ -935,6 +969,87 @@ const WorkoutTracker: React.FC = () => {
           </div>
         </div>
 
+        {/* Timer em tela cheia */}
+        {isTimerOpen && (() => {
+          const isIdle = !timerActive && timerSeconds === 0
+          const shown = isIdle ? timerDuration : timerSeconds
+          const pct = isIdle ? 100 : Math.round((timerSeconds / Math.max(timerDuration, timerSeconds, 1)) * 100)
+          return (
+            <div className={`fixed inset-0 z-50 ${workouts[currentWorkout].color} text-white flex flex-col`}>
+              <div className="flex items-center justify-between p-4">
+                <span className="font-bold text-sm">Timer de descanso</span>
+                <button onClick={() => setIsTimerOpen(false)} className="text-sm font-semibold bg-white/20 px-3 py-1 rounded hover:bg-white/30">Fechar</button>
+              </div>
+
+              <div className="flex-1 flex flex-col items-center justify-center px-4">
+                <span className="font-bold tabular-nums leading-none text-[26vw] sm:text-[160px]">{formatSeconds(shown)}</span>
+                <div className="w-full max-w-md bg-white/20 rounded-full h-3 mt-6">
+                  <div className="h-3 rounded-full bg-white transition-all duration-300" style={{ width: `${pct}%` }}></div>
+                </div>
+              </div>
+
+              <div className="p-4 max-w-md w-full mx-auto space-y-3">
+                {/* Escolha do tempo */}
+                <div className="grid grid-cols-5 gap-2">
+                  {[30, 60, 90, 120, 180].map(sec => (
+                    <button
+                      key={sec}
+                      onClick={() => changeTimerDuration(sec)}
+                      disabled={!isIdle}
+                      className={`py-2 rounded text-sm font-semibold disabled:opacity-40 ${timerDuration === sec ? 'bg-white text-gray-900' : 'bg-white/20 hover:bg-white/30'}`}
+                    >
+                      {formatSeconds(sec).replace(/^0/, '')}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => changeTimerDuration(timerDuration - 15)} disabled={!isIdle} className="flex-1 py-2 rounded bg-white/20 hover:bg-white/30 font-semibold text-sm disabled:opacity-40">−15s</button>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    min={0}
+                    max={60}
+                    aria-label="Minutos"
+                    value={Math.floor(timerDuration / 60)}
+                    disabled={!isIdle}
+                    onChange={e => changeTimerDuration((Number(e.target.value) || 0) * 60 + (timerDuration % 60))}
+                    className="w-14 py-2 rounded bg-white/90 text-gray-900 text-center text-sm font-bold disabled:opacity-40"
+                  />
+                  <span className="font-bold">:</span>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    min={0}
+                    max={59}
+                    aria-label="Segundos"
+                    value={timerDuration % 60}
+                    disabled={!isIdle}
+                    onChange={e => changeTimerDuration(Math.floor(timerDuration / 60) * 60 + Math.min(Number(e.target.value) || 0, 59))}
+                    className="w-14 py-2 rounded bg-white/90 text-gray-900 text-center text-sm font-bold disabled:opacity-40"
+                  />
+                  <button onClick={() => changeTimerDuration(timerDuration + 15)} disabled={!isIdle} className="flex-1 py-2 rounded bg-white/20 hover:bg-white/30 font-semibold text-sm disabled:opacity-40">+15s</button>
+                </div>
+
+                {/* Controles */}
+                <div className="flex gap-2 pt-2">
+                  {isIdle ? (
+                    <button onClick={startTimer} className="flex-1 py-4 rounded-lg bg-white text-gray-900 font-bold text-lg">Iniciar</button>
+                  ) : (
+                    <>
+                      <button onClick={stopTimer} className="flex-1 py-4 rounded-lg bg-white/20 hover:bg-white/30 font-bold text-lg">Zerar</button>
+                      {timerActive ? (
+                        <button onClick={pauseTimer} className="flex-1 py-4 rounded-lg bg-white text-gray-900 font-bold text-lg">Pausar</button>
+                      ) : (
+                        <button onClick={resumeTimer} className="flex-1 py-4 rounded-lg bg-white text-gray-900 font-bold text-lg">Continuar</button>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          )
+        })()}
+
         {isModalOpen && selected && (
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50" onClick={() => { setIsModalOpen(false); setSelected(null); }}>
             <div className="bg-white rounded-lg shadow-lg w-11/12 max-w-sm" onClick={e => e.stopPropagation()}>
@@ -983,6 +1098,7 @@ const WorkoutTracker: React.FC = () => {
             <li>• Progressão dupla: bateu o topo da faixa em todas as séries? Suba a carga e volte ao início da faixa</li>
             <li>• Carga inicial nova: escolha pelo RIR alvo, não pela carga antiga</li>
             <li>• Sessões de 60-75 min: não adicione exercícios</li>
+            <li>• Descanso: 2-3 min nos compostos, 1-1:30 nos isoladores (toque no timer para ajustar)</li>
           </ul>
         </div>
       </div>
