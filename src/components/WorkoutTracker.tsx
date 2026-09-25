@@ -11,6 +11,8 @@ interface Exercise {
   reps: string
   sets: string
   type: ExerciseType
+  rir?: string
+  alternatives?: string[]
 }
 
 interface Workout {
@@ -23,105 +25,103 @@ interface Workout {
 
 type WorkoutKey = 'A' | 'B' | 'C' | 'D' | 'E'
 
+// Início da rotina Upper/Lower. Conclusões anteriores a esta data pertencem à
+// rotina antiga (A-E) e são exibidas como "Treino anterior" no histórico.
+// IDs de exercício novos (ua*, la*, ub*, lb*, rc*) evitam herdar cargas antigas.
+const ROUTINE_START = '2026-09-25'
+
 const workouts: Record<WorkoutKey, Workout> = {
   A: {
-    name: 'TREINO A - COSTAS E BÍCEPS',
+    name: 'TREINO A - UPPER A',
     day: 'Segunda-feira',
     color: 'bg-blue-600',
-    cardio: 'Esteira 10 min',
+    cardio: 'Esteira 10 min leve (opcional)',
     exercises: [
-      { id: 'a1', name: 'Puxada Aberta (Pegada Larga)', reps: '10-12', sets: '4x', type: 'N' },
-      { id: 'a2', name: 'Pullover na Polia', reps: '12-15', sets: '4x', type: 'N' },
-      { id: 'a3', name: 'Remada Cavalinho', reps: '10-12', sets: '4x', type: 'N' },
-      { id: 'a4', name: 'Remada Polia Baixa Barra Reta', reps: '8 + 8', sets: '3x', type: 'DS' },
-      { id: 'a5', name: 'Puxada Triângulo (Pegada Supinada)', reps: '12', sets: '3x', type: 'N' },
-      { id: 'a6', name: 'Banco Scott com Halter', reps: '10', sets: '4x', type: 'N' },
-      { id: 'a7', name: 'Rosca Direta Barra W', reps: '10-12', sets: '3x', type: 'N' },
-      { id: 'a8', name: 'Rosca Martelo', reps: '10-12', sets: '3x', type: 'N' },
-      { id: 'a9', name: 'Abdominal Supra Banco Declinado', reps: '15', sets: '4x', type: 'N' },
-      { id: 'a10', name: 'Esteira', reps: '10 min', sets: '1x', type: 'CARDIO' },
+      { id: 'ua1', name: 'Supino Reto com Barra', reps: '6-8', sets: '3x', type: 'N', rir: '2' },
+      { id: 'ua2', name: 'Puxada Aberta (Pegada Pronada)', reps: '6-10', sets: '3x', type: 'N', rir: '1-2' },
+      { id: 'ua3', name: 'Supino Inclinado com Halteres', reps: '8-10', sets: '3x', type: 'N', rir: '1-2' },
+      { id: 'ua4', name: 'Remada Apoiada / Máquina', reps: '8-10', sets: '3x', type: 'N', rir: '1-2' },
+      { id: 'ua5', name: 'Elevação Lateral', reps: '10-15', sets: '3x', type: 'N', rir: '1-2' },
+      { id: 'ua6', name: 'Tríceps na Polia', reps: '10-15', sets: '2x', type: 'N', rir: '1-2' },
+      { id: 'ua7', name: 'Rosca Direta', reps: '8-12', sets: '2x', type: 'N', rir: '1-2' },
     ],
   },
   B: {
-    name: 'TREINO B - PERNAS "LEG SWEEP"',
+    name: 'TREINO B - LOWER A',
     day: 'Terça-feira',
     color: 'bg-red-600',
-    cardio: 'Bicicleta 10 min',
+    cardio: 'Bicicleta 10 min leve',
     exercises: [
-      { id: 'b1', name: 'Agachamento Sumo', reps: '10', sets: '4x', type: 'N' },
-      { id: 'b2', name: 'Leg Press (Pés Altos/Afastados)', reps: '12', sets: '4x', type: 'N' },
-      { id: 'b3', name: 'Agachamento Búlgaro', reps: '10-12', sets: '3x', type: 'N' },
-      { id: 'b4', name: 'Mesa Flexora', reps: '8 + 8', sets: '3x', type: 'DS' },
-      { id: 'b5', name: 'Cadeira Extensora (Rotação Externa)', reps: '8 + 8', sets: '3x', type: 'DS' },
-      { id: 'b6', name: 'Elevação Pélvica', reps: '15', sets: '4x', type: 'N' },
-      { id: 'b7', name: 'Panturrilha em Pé (Rotação Interna)', reps: '15', sets: '4x', type: 'N' },
-      { id: 'b8', name: 'Abdução na Máquina', reps: '15', sets: '3x', type: 'N' },
-      { id: 'b9', name: 'Adução na Máquina', reps: '15', sets: '3x', type: 'N' },
-      { id: 'b10', name: 'Abdominal Infra Banco Declinado', reps: '15', sets: '3x', type: 'N' },
-      { id: 'b11', name: 'Bicicleta', reps: '10 min', sets: '1x', type: 'CARDIO' },
+      { id: 'la1', name: 'Agachamento Livre ou Smith', reps: '6-8', sets: '3x', type: 'N', rir: '2', alternatives: ['Agachamento Smith'] },
+      { id: 'la2', name: 'Leg Press', reps: '8-12', sets: '3x', type: 'N', rir: '1-2' },
+      { id: 'la3', name: 'Stiff / Romanian Deadlift', reps: '6-10', sets: '3x', type: 'N', rir: '1-2' },
+      { id: 'la4', name: 'Mesa Flexora', reps: '10-15', sets: '3x', type: 'N', rir: '1-2' },
+      { id: 'la5', name: 'Cadeira Extensora', reps: '10-15', sets: '2x', type: 'N', rir: '1-2' },
+      { id: 'la6', name: 'Panturrilha em Pé', reps: '8-12', sets: '3x', type: 'N', rir: '1-2' },
+      { id: 'la7', name: 'Abdominal', reps: '10-15', sets: '2-3x', type: 'N', rir: '1-2' },
     ],
   },
   C: {
-    name: 'TREINO C - PEITO, OMBROS E TRÍCEPS',
-    day: 'Quarta-feira',
+    name: 'TREINO C - UPPER B',
+    day: 'Quinta-feira',
     color: 'bg-green-600',
-    cardio: 'Esteira 10 min',
+    cardio: 'Esteira 10 min leve',
     exercises: [
-      { id: 'c1', name: 'Supino Declinado com Halter', reps: '8-10', sets: '4x', type: 'N' },
-      { id: 'c3', name: 'Supino Reto com Barra', reps: '6-8', sets: '4x', type: 'N' },
-      { id: 'c12', name: 'Paralelas (Dip) para Peito', reps: '8-12', sets: '3x', type: 'N' },
-      { id: 'c2', name: 'Crucifixo Declinado com Halter', reps: '10-12', sets: '3x', type: 'N' },
-      { id: 'c4', name: 'Desenvolvimento Arnold', reps: '8-10', sets: '4x', type: 'N' },
-      { id: 'c5', name: 'Elevação Lateral 21s', reps: '7+7+7', sets: '3x', type: 'SP' },
-      { id: 'c6', name: 'Crucifixo Inverso na Máquina', reps: '12-15', sets: '4x', type: 'N' },
-      { id: 'c7', name: 'Elevação Frontal na Polia', reps: '10', sets: '3x', type: 'N' },
-      { id: 'c8', name: 'Tríceps Francês Unilateral', reps: '12', sets: '3x', type: 'N' },
-      { id: 'c9', name: 'Tríceps Corda na Polia', reps: '10 + 10', sets: '3x', type: 'DS' },
-      { id: 'c10', name: 'Abdominal Supra Declinado com Carga', reps: '12', sets: '4x', type: 'N' },
-      { id: 'c11', name: 'Esteira', reps: '10 min', sets: '1x', type: 'CARDIO' },
+      { id: 'ub1', name: 'Remada Baixa / Cavalinho', reps: '6-10', sets: '3x', type: 'N', rir: '1-2' },
+      { id: 'ub2', name: 'Supino Inclinado', reps: '6-10', sets: '3x', type: 'N', rir: '1-2' },
+      { id: 'ub3', name: 'Puxada Neutra / Supinada', reps: '8-12', sets: '3x', type: 'N', rir: '1-2' },
+      { id: 'ub4', name: 'Crucifixo na Máquina ou Cabo', reps: '10-15', sets: '2x', type: 'N', rir: '1-2' },
+      { id: 'ub5', name: 'Desenvolvimento com Halteres ou Máquina', reps: '6-10', sets: '2x', type: 'N', rir: '2' },
+      { id: 'ub6', name: 'Elevação Lateral', reps: '12-20', sets: '3x', type: 'N', rir: '1-2' },
+      { id: 'ub7', name: 'Rosca Martelo', reps: '8-12', sets: '2x', type: 'N', rir: '1-2' },
+      { id: 'ub8', name: 'Tríceps Francês / Cabo', reps: '8-12', sets: '2x', type: 'N', rir: '1-2' },
     ],
   },
   D: {
-    name: 'TREINO D - PERNAS VOLUME/BOMBA',
+    name: 'TREINO D - LOWER B',
     day: 'Sexta-feira',
     color: 'bg-purple-600',
-    cardio: 'Bicicleta 10 min',
+    cardio: 'Bicicleta 10 min leve',
     exercises: [
-      { id: 'd1', name: 'Agachamento no Smith', reps: '15', sets: '4x', type: 'N' },
-      { id: 'd2', name: 'Cadeira Extensora', reps: '15-20', sets: '4x', type: 'N' },
-      { id: 'd3', name: 'Leg Press (Pés Juntos)', reps: '20', sets: '3x', type: 'N' },
-      { id: 'd4', name: 'Stiff com Halteres', reps: '12', sets: '4x', type: 'N' },
-      { id: 'd5', name: 'Mesa Flexora', reps: '15', sets: '3x', type: 'N' },
-      { id: 'd6', name: 'Afundo Búlgaro', reps: '12', sets: '3x', type: 'N' },
-      { id: 'd7', name: 'Panturrilha Sentado', reps: '20', sets: '4x', type: 'N' },
-      { id: 'd8', name: 'Abdução na Máquina', reps: '15', sets: '3x', type: 'N' },
-      { id: 'd9', name: 'Adução na Máquina', reps: '15', sets: '3x', type: 'N' },
-      { id: 'd10', name: 'Abdominal Oblíquo (Bicicleta)', reps: '15 cada lado', sets: '3x', type: 'N' },
-      { id: 'd11', name: 'Bicicleta', reps: '10 min', sets: '1x', type: 'CARDIO' },
+      // Ordem obrigatória: Hack/Smith antes do RDL
+      { id: 'lb1', name: 'Agachamento Hack ou Smith', reps: '8-10', sets: '3x', type: 'N', rir: '1-2', alternatives: ['Agachamento Smith', 'Leg Press'] },
+      { id: 'lb2', name: 'Stiff / Romanian Deadlift', reps: '6-8', sets: '3x', type: 'N', rir: '2' },
+      { id: 'lb3', name: 'Hip Thrust', reps: '8-12', sets: '3x', type: 'N', rir: '1-2' },
+      { id: 'lb4', name: 'Mesa Flexora', reps: '10-15', sets: '3x', type: 'N', rir: '1-2' },
+      { id: 'lb5', name: 'Leg Press', reps: '10-15', sets: '2x', type: 'N', rir: '1-2' },
+      { id: 'lb6', name: 'Panturrilha Sentado', reps: '10-15', sets: '3x', type: 'N', rir: '1-2' },
+      { id: 'lb7', name: 'Abdominal', reps: '10-15', sets: '2-3x', type: 'N', rir: '1-2' },
     ],
   },
   E: {
-    name: 'TREINO E - OMBROS ESPECIALIZADOS',
+    name: 'TREINO E - CARDIO / RECUPERAÇÃO (OPCIONAL)',
     day: 'Sábado',
     color: 'bg-orange-600',
-    cardio: 'Esteira 10 min',
+    cardio: 'Caminhada / Bicicleta 30–45 min (opcional)',
     exercises: [
-      { id: 'e1', name: 'Desenvolvimento com Barra pela Frente', reps: '8-10', sets: '4x', type: 'N' },
-      { id: 'e2', name: 'Elevação Lateral com Cabo', reps: '12', sets: '4x', type: 'N' },
-      { id: 'e3', name: 'Remada Alta', reps: '10', sets: '3x', type: 'N' },
-      { id: 'e4', name: 'Elevação Lateral Inclinada', reps: '12', sets: '3x', type: 'N' },
-      { id: 'e5', name: 'Elevação Posterior com Halteres', reps: '12', sets: '3x', type: 'N' },
-      { id: 'e6', name: 'Elevação Posterior no Cabo', reps: '12', sets: '3x', type: 'N' },
-      { id: 'e7', name: 'Abdominal Infra Banco Declinado', reps: '15', sets: '3x', type: 'N' },
-      { id: 'e8', name: 'Esteira', reps: '10 min', sets: '1x', type: 'CARDIO' },
+      { id: 'rc1', name: 'Caminhada / Esteira', reps: '30-45 min', sets: '1x', type: 'CARDIO' },
+      { id: 'rc2', name: 'Mobilidade', reps: '5-10 min', sets: '1x', type: 'N' },
     ],
   },
 }
 
+// Lê do localStorage na inicialização do estado, antes que os efeitos de persistência gravem o estado vazio
+const readLocal = <T,>(key: string, fallback: T): T => {
+  try {
+    const raw = localStorage.getItem(key)
+    return raw ? (JSON.parse(raw) as T) : fallback
+  } catch {
+    return fallback
+  }
+}
+
 const WorkoutTracker: React.FC = () => {
-  const [currentWorkout, setCurrentWorkout] = useState<WorkoutKey>('A')
-  const [completedExercises, setCompletedExercises] = useState<Record<string, boolean>>({})
-  const [workoutHistory, setWorkoutHistory] = useState<Array<{ workout: WorkoutKey; date: string; completed: boolean }>>([])
+  const [currentWorkout, setCurrentWorkout] = useState<WorkoutKey>(() => {
+    const saved = localStorage.getItem('currentWorkout') as WorkoutKey | null
+    return saved && saved in workouts ? saved : 'A'
+  })
+  const [completedExercises, setCompletedExercises] = useState<Record<string, boolean>>(() => readLocal('completedExercises', {}))
+  const [workoutHistory, setWorkoutHistory] = useState<Array<{ workout: WorkoutKey; date: string; completed: boolean }>>(() => readLocal('workoutHistory', []))
 
   // Filtro e dados do calendário visual
   const [calendarFilter, setCalendarFilter] = useState<'week' | 'month' | 'year'>('month')
@@ -166,7 +166,7 @@ const WorkoutTracker: React.FC = () => {
   }, [timerActive])
 
   // Estado para carga e anotação por exercício
-  const [exerciseNotes, setExerciseNotes] = useState<Record<string, { load: string; note: string }>>({})
+  const [exerciseNotes, setExerciseNotes] = useState<Record<string, { load: string; note: string }>>(() => readLocal('exerciseNotes', {}))
   // Controle de modal e seleção atual
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selected, setSelected] = useState<{ workoutId: WorkoutKey; exercise: Exercise } | null>(null)
@@ -183,16 +183,6 @@ const WorkoutTracker: React.FC = () => {
         const { data: userRes } = await supabase.auth.getUser()
         const userId = userRes?.user?.id || null
         setUserId(userId)
-
-        // localStorage hydration
-        const savedCompleted = localStorage.getItem('completedExercises')
-        if (savedCompleted) setCompletedExercises(JSON.parse(savedCompleted))
-        const savedHistory = localStorage.getItem('workoutHistory')
-        if (savedHistory) setWorkoutHistory(JSON.parse(savedHistory))
-        const savedWorkout = localStorage.getItem('currentWorkout') as WorkoutKey | null
-        if (savedWorkout) setCurrentWorkout(savedWorkout)
-        const savedNotes = localStorage.getItem('exerciseNotes')
-        if (savedNotes) setExerciseNotes(JSON.parse(savedNotes))
 
         // server hydration (últimas cargas/anotações + histórico)
         if (userId) {
@@ -748,6 +738,9 @@ const WorkoutTracker: React.FC = () => {
                   </h3>
                   <div className="flex items-center gap-2 mt-1 flex-wrap">
                     <span className="text-xs text-gray-600">{exercise.sets} × {exercise.reps}</span>
+                    {exercise.rir && (
+                      <span className="text-xs text-gray-600">• RIR {exercise.rir}</span>
+                    )}
                     {exerciseNotes[`${currentWorkout}-${exercise.id}`]?.load && (
                       <span className="text-xs text-gray-600">• carga: {exerciseNotes[`${currentWorkout}-${exercise.id}`]?.load}</span>
                     )}
@@ -787,19 +780,23 @@ const WorkoutTracker: React.FC = () => {
               </h3>
             </div>
             <div className="p-4">
-              {workoutHistory.map((entry, index) => (
-                <div key={index} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-full ${workouts[entry.workout].color} flex items-center justify-center text-white font-bold text-sm`}>
-                      {entry.workout}
+              {workoutHistory.map((entry, index) => {
+                // Sessões da rotina antiga não recebem o nome dos novos treinos
+                const isLegacy = parsePtBrToISO(entry.date) < ROUTINE_START
+                return (
+                  <div key={index} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-full ${isLegacy ? 'bg-gray-400' : workouts[entry.workout].color} flex items-center justify-center text-white font-bold text-sm`}>
+                        {entry.workout}
+                      </div>
+                      <span className={`font-medium text-sm ${isLegacy ? 'text-gray-500' : 'text-gray-800'}`}>
+                        {isLegacy ? 'Treino anterior' : workouts[entry.workout].name.split(' - ')[1]}
+                      </span>
                     </div>
-                    <span className="text-gray-800 font-medium text-sm">
-                      {workouts[entry.workout].name.split(' - ')[1]}
-                    </span>
+                    <span className="text-gray-600 text-xs">{entry.date}</span>
                   </div>
-                  <span className="text-gray-600 text-xs">{entry.date}</span>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
         )}
@@ -909,31 +906,31 @@ const WorkoutTracker: React.FC = () => {
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-blue-600"></div>
-              <span className="text-sm text-gray-700">Segunda - Costas/Bíceps</span>
+              <span className="text-sm text-gray-700">Segunda - A: Upper A</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-red-600"></div>
-              <span className="text-sm text-gray-700">Terça - Pernas (Leg Sweep)</span>
+              <span className="text-sm text-gray-700">Terça - B: Lower A</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-gray-400"></div>
+              <span className="text-sm text-gray-700">Quarta - Descanso/Cardio (30–45 min leve)</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-green-600"></div>
-              <span className="text-sm text-gray-700">Quarta - Peito/Ombros/Tríceps</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-gray-400"></div>
-              <span className="text-sm text-gray-700">Quinta - Descanso/Cardio</span>
+              <span className="text-sm text-gray-700">Quinta - C: Upper B</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-purple-600"></div>
-              <span className="text-sm text-gray-700">Sexta - Pernas (Volume/Bomba)</span>
+              <span className="text-sm text-gray-700">Sexta - D: Lower B</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-orange-600"></div>
-              <span className="text-sm text-gray-700">Sábado - Ombros Especializados</span>
+              <span className="text-sm text-gray-700">Sábado - E: Cardio/Mobilidade (opcional)</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-gray-400"></div>
-              <span className="text-sm text-gray-700">Domingo - Descanso Total</span>
+              <span className="text-sm text-gray-700">Domingo - Descanso (Meal Prep)</span>
             </div>
           </div>
         </div>
@@ -943,7 +940,7 @@ const WorkoutTracker: React.FC = () => {
             <div className="bg-white rounded-lg shadow-lg w-11/12 max-w-sm" onClick={e => e.stopPropagation()}>
               <div className={`${workouts[selected.workoutId].color} text-white p-4 rounded-t-lg`}>
                 <h4 className="font-bold text-sm">{selected.exercise.name}</h4>
-                <p className="text-xs opacity-90">{selected.exercise.sets} × {selected.exercise.reps}</p>
+                <p className="text-xs opacity-90">{selected.exercise.sets} × {selected.exercise.reps}{selected.exercise.rir ? ` · RIR ${selected.exercise.rir}` : ''}</p>
               </div>
               <div className="p-4 space-y-3">
                 <div>
@@ -981,12 +978,11 @@ const WorkoutTracker: React.FC = () => {
           <h4 className="font-bold text-blue-800 mb-2">💡 Dicas Importantes:</h4>
           <ul className="text-blue-700 text-sm space-y-1">
             <li>• Foque na técnica perfeita</li>
-            <li>• DS = Drop Set (reduza 30-40% do peso)</li>
-            <li>• Elevação Lateral 21s = técnica especial</li>
-            <li>• Agachamento Búlgaro = pé traseiro no banco</li>
-            <li>• Abdução: glúteo médio (formato redondo)</li>
-            <li>• Adução: adutores (fechamento das pernas)</li>
-            <li>• Pernas 2x/semana = máxima hipertrofia</li>
+            <li>• RIR = repetições que ainda sobrariam antes da falha</li>
+            <li>• Compostos RIR 2, isoladores RIR 1-2 — sem falha em tudo</li>
+            <li>• Progressão dupla: bateu o topo da faixa em todas as séries? Suba a carga e volte ao início da faixa</li>
+            <li>• Carga inicial nova: escolha pelo RIR alvo, não pela carga antiga</li>
+            <li>• Sessões de 60-75 min: não adicione exercícios</li>
           </ul>
         </div>
       </div>
