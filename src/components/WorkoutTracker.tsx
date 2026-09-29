@@ -22,11 +22,11 @@ interface Workout {
   exercises: Exercise[]
 }
 
-type WorkoutKey = 'A' | 'B' | 'C' | 'D' | 'E'
+type WorkoutKey = 'A' | 'B' | 'C' | 'D'
 
 // Início da rotina Upper/Lower. Conclusões anteriores a esta data pertencem à
 // rotina antiga (A-E) e são exibidas como "Treino anterior" no histórico.
-// IDs de exercício novos (ua*, la*, ub*, lb*, rc*) evitam herdar cargas antigas.
+// IDs de exercício novos (ua*, la*, ub*, lb*) evitam herdar cargas antigas.
 const ROUTINE_START = '2026-09-25'
 
 const workouts: Record<WorkoutKey, Workout> = {
@@ -95,16 +95,6 @@ const workouts: Record<WorkoutKey, Workout> = {
       { id: 'lb6', name: 'Panturrilha Sentado', reps: '12', sets: '3x', type: 'N' },
       { id: 'lb7', name: 'Abdominal Infra no Banco Declinado', reps: '12', sets: '3x', type: 'N' },
       { id: 'lb9', name: 'Bicicleta', reps: '10 min', sets: '1x', type: 'CARDIO' },
-    ],
-  },
-  E: {
-    name: 'TREINO E - CARDIO / RECUPERAÇÃO (OPCIONAL)',
-    day: 'Sábado',
-    color: 'bg-orange-600',
-    cardio: 'Caminhada na Esteira 30–45 min (opcional)',
-    exercises: [
-      { id: 'rc1', name: 'Caminhada na Esteira', reps: '30-45 min', sets: '1x', type: 'CARDIO' },
-      { id: 'rc2', name: 'Mobilidade', reps: '5-10 min', sets: '1x', type: 'N' },
     ],
   },
 }
@@ -660,13 +650,12 @@ const WorkoutTracker: React.FC = () => {
     return 'bg-gray-400'
   }
 
-  // Próximo treino em sequência A → B → C → D → E → A
+  // Próximo treino em sequência A → B → C → D → A
   const getNextWorkout = (wk: WorkoutKey): WorkoutKey => {
     switch (wk) {
       case 'A': return 'B'
       case 'B': return 'C'
       case 'C': return 'D'
-      case 'D': return 'E'
       default: return 'A'
     }
   }
@@ -817,7 +806,8 @@ const WorkoutTracker: React.FC = () => {
             <div className="p-4">
               {workoutHistory.map((entry, index) => {
                 // Sessões da rotina antiga não recebem o nome dos novos treinos
-                const isLegacy = parsePtBrToISO(entry.date) < ROUTINE_START
+                // (inclui o antigo treino E, que não existe mais na rotina)
+                const isLegacy = parsePtBrToISO(entry.date) < ROUTINE_START || !(entry.workout in workouts)
                 return (
                   <div key={index} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
                     <div className="flex items-center gap-3">
@@ -960,8 +950,8 @@ const WorkoutTracker: React.FC = () => {
               <span className="text-sm text-gray-700">Sexta - D: Lower B</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-orange-600"></div>
-              <span className="text-sm text-gray-700">Sábado - E: Cardio/Mobilidade (opcional)</span>
+              <div className="w-3 h-3 rounded-full bg-gray-400"></div>
+              <span className="text-sm text-gray-700">Sábado - Descanso</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-gray-400"></div>
