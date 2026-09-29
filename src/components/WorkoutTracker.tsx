@@ -11,7 +11,6 @@ interface Exercise {
   reps: string
   sets: string
   type: ExerciseType
-  rir?: string
   alternatives?: string[]
 }
 
@@ -35,62 +34,67 @@ const workouts: Record<WorkoutKey, Workout> = {
     name: 'TREINO A - UPPER A',
     day: 'Segunda-feira',
     color: 'bg-blue-600',
-    cardio: 'Esteira 10 min leve (opcional)',
+    cardio: 'Esteira 10 min',
     exercises: [
-      { id: 'ua1', name: 'Supino Reto com Barra', reps: '6-8', sets: '3x', type: 'N', rir: '2' },
-      { id: 'ua2', name: 'Puxada Aberta (Pegada Pronada)', reps: '6-10', sets: '3x', type: 'N', rir: '1-2' },
-      { id: 'ua3', name: 'Supino Inclinado com Halteres', reps: '8-10', sets: '3x', type: 'N', rir: '1-2' },
-      { id: 'ua4', name: 'Remada Apoiada no Banco (Halteres)', reps: '8-10', sets: '3x', type: 'N', rir: '1-2' },
-      { id: 'ua5', name: 'Elevação Lateral', reps: '10-15', sets: '3x', type: 'N', rir: '1-2' },
-      { id: 'ua6', name: 'Tríceps na Polia', reps: '10-15', sets: '2x', type: 'N', rir: '1-2' },
-      { id: 'ua7', name: 'Rosca Direta', reps: '8-12', sets: '2x', type: 'N', rir: '1-2' },
+      { id: 'ua1', name: 'Supino Reto com Barra', reps: '12', sets: '3x', type: 'N' },
+      { id: 'ua2', name: 'Puxada Aberta (Pegada Pronada)', reps: '12', sets: '3x', type: 'N' },
+      { id: 'ua3', name: 'Supino Inclinado com Halteres', reps: '12', sets: '3x', type: 'N' },
+      { id: 'ua4', name: 'Remada Apoiada no Banco (Halteres)', reps: '12', sets: '3x', type: 'N' },
+      { id: 'ua5', name: 'Elevação Lateral', reps: '12', sets: '3x', type: 'N' },
+      { id: 'ua6', name: 'Tríceps na Polia', reps: '12', sets: '3x', type: 'N' },
+      { id: 'ua7', name: 'Rosca Direta', reps: '12', sets: '3x', type: 'N' },
+      { id: 'ua9', name: 'Abdominal Oblíquo (Bicicleta)', reps: '12 cada lado', sets: '3x', type: 'N' },
+      { id: 'ua8', name: 'Esteira', reps: '10 min', sets: '1x', type: 'CARDIO' },
     ],
   },
   B: {
     name: 'TREINO B - LOWER A',
     day: 'Terça-feira',
     color: 'bg-red-600',
-    cardio: 'Bicicleta 10 min leve',
+    cardio: 'Bicicleta 10 min',
     exercises: [
-      { id: 'la1', name: 'Agachamento Livre', reps: '6-8', sets: '3x', type: 'N', rir: '2', alternatives: ['Agachamento Smith'] },
-      { id: 'la2', name: 'Leg Press', reps: '8-12', sets: '3x', type: 'N', rir: '1-2' },
-      { id: 'la3', name: 'Stiff com Barra', reps: '6-10', sets: '3x', type: 'N', rir: '1-2' },
-      { id: 'la4', name: 'Mesa Flexora', reps: '10-15', sets: '3x', type: 'N', rir: '1-2' },
-      { id: 'la5', name: 'Cadeira Extensora', reps: '10-15', sets: '2x', type: 'N', rir: '1-2' },
-      { id: 'la6', name: 'Panturrilha em Pé', reps: '8-12', sets: '3x', type: 'N', rir: '1-2' },
-      { id: 'la7', name: 'Abdominal', reps: '10-15', sets: '2-3x', type: 'N', rir: '1-2' },
+      { id: 'la1', name: 'Agachamento Livre', reps: '12', sets: '3x', type: 'N', alternatives: ['Agachamento Smith'] },
+      { id: 'la2', name: 'Leg Press', reps: '12', sets: '3x', type: 'N' },
+      { id: 'la3', name: 'Stiff com Barra', reps: '12', sets: '3x', type: 'N' },
+      { id: 'la4', name: 'Mesa Flexora', reps: '12', sets: '3x', type: 'N' },
+      { id: 'la5', name: 'Cadeira Extensora', reps: '12', sets: '3x', type: 'N' },
+      { id: 'la6', name: 'Panturrilha em Pé', reps: '12', sets: '3x', type: 'N' },
+      { id: 'la7', name: 'Abdominal Supra no Banco Declinado', reps: '12', sets: '3x', type: 'N' },
+      { id: 'la8', name: 'Bicicleta', reps: '10 min', sets: '1x', type: 'CARDIO' },
     ],
   },
   C: {
     name: 'TREINO C - UPPER B',
     day: 'Quinta-feira',
     color: 'bg-green-600',
-    cardio: 'Esteira 10 min leve',
+    cardio: 'Esteira 10 min',
     exercises: [
-      { id: 'ub1', name: 'Remada Cavalinho', reps: '6-10', sets: '3x', type: 'N', rir: '1-2' },
-      { id: 'ub2', name: 'Supino Inclinado com Barra', reps: '6-10', sets: '3x', type: 'N', rir: '1-2' },
-      { id: 'ub3', name: 'Puxada Triângulo (Neutra)', reps: '8-12', sets: '3x', type: 'N', rir: '1-2' },
-      { id: 'ub4', name: 'Crucifixo na Máquina (Peck Deck)', reps: '10-15', sets: '2x', type: 'N', rir: '1-2' },
-      { id: 'ub5', name: 'Desenvolvimento com Halteres', reps: '6-10', sets: '2x', type: 'N', rir: '2' },
-      { id: 'ub6', name: 'Elevação Lateral', reps: '12-20', sets: '3x', type: 'N', rir: '1-2' },
-      { id: 'ub7', name: 'Rosca Martelo', reps: '8-12', sets: '2x', type: 'N', rir: '1-2' },
-      { id: 'ub8', name: 'Tríceps Francês na Polia', reps: '8-12', sets: '2x', type: 'N', rir: '1-2' },
+      { id: 'ub1', name: 'Remada Cavalinho', reps: '12', sets: '3x', type: 'N' },
+      { id: 'ub2', name: 'Supino Inclinado com Barra', reps: '12', sets: '3x', type: 'N' },
+      { id: 'ub3', name: 'Puxada Triângulo (Neutra)', reps: '12', sets: '3x', type: 'N' },
+      { id: 'ub4', name: 'Crucifixo na Máquina (Peck Deck)', reps: '12', sets: '3x', type: 'N' },
+      { id: 'ub5', name: 'Desenvolvimento com Halteres', reps: '12', sets: '3x', type: 'N' },
+      { id: 'ub6', name: 'Elevação Lateral', reps: '12', sets: '3x', type: 'N' },
+      { id: 'ub7', name: 'Rosca Martelo', reps: '12', sets: '3x', type: 'N' },
+      { id: 'ub8', name: 'Tríceps Francês na Polia', reps: '12', sets: '3x', type: 'N' },
+      { id: 'ub9', name: 'Esteira', reps: '10 min', sets: '1x', type: 'CARDIO' },
     ],
   },
   D: {
     name: 'TREINO D - LOWER B',
     day: 'Sexta-feira',
     color: 'bg-purple-600',
-    cardio: 'Bicicleta 10 min leve',
+    cardio: 'Bicicleta 10 min',
     exercises: [
       // Ordem obrigatória: Hack antes do Stiff
-      { id: 'lb1', name: 'Agachamento Hack', reps: '8-10', sets: '3x', type: 'N', rir: '1-2', alternatives: ['Agachamento Smith', 'Leg Press'] },
-      { id: 'lb2', name: 'Stiff com Barra', reps: '6-8', sets: '3x', type: 'N', rir: '2' },
-      { id: 'lb3', name: 'Hip Thrust', reps: '8-12', sets: '3x', type: 'N', rir: '1-2' },
-      { id: 'lb4', name: 'Mesa Flexora', reps: '10-15', sets: '3x', type: 'N', rir: '1-2' },
-      { id: 'lb8', name: 'Abdução na Máquina', reps: '12-15', sets: '2-3x', type: 'N', rir: '1-2' },
-      { id: 'lb6', name: 'Panturrilha Sentado', reps: '10-15', sets: '3x', type: 'N', rir: '1-2' },
-      { id: 'lb7', name: 'Abdominal', reps: '10-15', sets: '2-3x', type: 'N', rir: '1-2' },
+      { id: 'lb1', name: 'Agachamento Hack', reps: '12', sets: '3x', type: 'N', alternatives: ['Agachamento Smith', 'Leg Press'] },
+      { id: 'lb2', name: 'Stiff com Barra', reps: '12', sets: '3x', type: 'N' },
+      { id: 'lb3', name: 'Elevação Pélvica', reps: '12', sets: '3x', type: 'N' },
+      { id: 'lb4', name: 'Mesa Flexora', reps: '12', sets: '3x', type: 'N' },
+      { id: 'lb8', name: 'Abdução na Máquina', reps: '12', sets: '3x', type: 'N' },
+      { id: 'lb6', name: 'Panturrilha Sentado', reps: '12', sets: '3x', type: 'N' },
+      { id: 'lb7', name: 'Abdominal Infra no Banco Declinado', reps: '12', sets: '3x', type: 'N' },
+      { id: 'lb9', name: 'Bicicleta', reps: '10 min', sets: '1x', type: 'CARDIO' },
     ],
   },
   E: {
@@ -772,9 +776,6 @@ const WorkoutTracker: React.FC = () => {
                   </h3>
                   <div className="flex items-center gap-2 mt-1 flex-wrap">
                     <span className="text-xs text-gray-600">{exercise.sets} × {exercise.reps}</span>
-                    {exercise.rir && (
-                      <span className="text-xs text-gray-600">• RIR {exercise.rir}</span>
-                    )}
                     {exerciseNotes[`${currentWorkout}-${exercise.id}`]?.load && (
                       <span className="text-xs text-gray-600">• carga: {exerciseNotes[`${currentWorkout}-${exercise.id}`]?.load}</span>
                     )}
@@ -1055,7 +1056,7 @@ const WorkoutTracker: React.FC = () => {
             <div className="bg-white rounded-lg shadow-lg w-11/12 max-w-sm" onClick={e => e.stopPropagation()}>
               <div className={`${workouts[selected.workoutId].color} text-white p-4 rounded-t-lg`}>
                 <h4 className="font-bold text-sm">{selected.exercise.name}</h4>
-                <p className="text-xs opacity-90">{selected.exercise.sets} × {selected.exercise.reps}{selected.exercise.rir ? ` · RIR ${selected.exercise.rir}` : ''}</p>
+                <p className="text-xs opacity-90">{selected.exercise.sets} × {selected.exercise.reps}</p>
               </div>
               <div className="p-4 space-y-3">
                 <div>
@@ -1093,11 +1094,8 @@ const WorkoutTracker: React.FC = () => {
           <h4 className="font-bold text-blue-800 mb-2">💡 Dicas Importantes:</h4>
           <ul className="text-blue-700 text-sm space-y-1">
             <li>• Foque na técnica perfeita</li>
-            <li>• RIR = repetições que ainda sobrariam antes da falha</li>
-            <li>• Compostos RIR 2, isoladores RIR 1-2 — sem falha em tudo</li>
-            <li>• Progressão dupla: bateu o topo da faixa em todas as séries? Suba a carga e volte ao início da faixa</li>
-            <li>• Carga inicial nova: escolha pelo RIR alvo, não pela carga antiga</li>
-            <li>• Sessões de 60-75 min: não adicione exercícios</li>
+            <li>• Progressão: fez 3×12 com boa técnica? Suba a carga na próxima sessão</li>
+            <li>• Carga inicial nova: escolha uma que permita 12 repetições com boa técnica</li>
             <li>• Descanso: 2-3 min nos compostos, 1-1:30 nos isoladores (toque no timer para ajustar)</li>
           </ul>
         </div>
