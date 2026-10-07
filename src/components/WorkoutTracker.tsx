@@ -42,7 +42,7 @@ const workouts: Record<WorkoutKey, Workout> = {
       { id: 'ua10', name: 'Remada Articulada na Máquina (Pegada Pronada)', reps: '12', sets: '3x', type: 'N' },
       { id: 'ua5', name: 'Elevação Lateral', reps: '12', sets: '3x', type: 'N' },
       { id: 'ua11', name: 'Crucifixo Inverso na Máquina', reps: '12', sets: '3x', type: 'N' },
-      { id: 'ua6', name: 'Tríceps na Polia', reps: '12', sets: '3x', type: 'N' },
+      { id: 'ua6', name: 'Tríceps Corda na Polia', reps: '12', sets: '3x', type: 'N' },
       { id: 'ua7', name: 'Rosca Direta', reps: '12', sets: '3x', type: 'N' },
       { id: 'ua9', name: 'Abdominal Oblíquo (Bicicleta)', reps: '12 cada lado', sets: '3x', type: 'N' },
       { id: 'ua8', name: 'Esteira', reps: '10 min', sets: '1x', type: 'CARDIO' },
