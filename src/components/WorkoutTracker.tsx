@@ -91,11 +91,13 @@ const workouts: Record<WorkoutKey, Workout> = {
     exercises: [
       // Ordem obrigatória: Hack antes do Stiff
       { id: 'lb1', name: 'Agachamento Hack', reps: '12', sets: '3x', type: 'N', alternatives: ['Agachamento Smith', 'Leg Press'] },
+      { id: 'lb10', name: 'Cadeira Extensora', reps: '12', sets: '3x', type: 'N' },
       { id: 'lb2', name: 'Stiff com Barra', reps: '12', sets: '3x', type: 'N' },
       { id: 'lb3', name: 'Elevação Pélvica', reps: '12', sets: '3x', type: 'N' },
       { id: 'lb4', name: 'Mesa Flexora', reps: '12', sets: '3x', type: 'N' },
       { id: 'lb8', name: 'Abdução na Máquina', reps: '12', sets: '3x', type: 'N' },
       { id: 'lb6', name: 'Panturrilha Sentado', reps: '12', sets: '3x', type: 'N' },
+      { id: 'lb11', name: 'Banco Scott com Halter', reps: '12', sets: '3x', type: 'N' },
       { id: 'lb7', name: 'Abdominal Infra no Banco Declinado', reps: '12', sets: '3x', type: 'N' },
       { id: 'lb9', name: 'Bicicleta', reps: '10 min', sets: '1x', type: 'CARDIO' },
     ],
